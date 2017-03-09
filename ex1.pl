@@ -74,8 +74,6 @@ idsUt([Id|T], L) :- solucoes((IdUt), ato_medico(Data,IdUt,Id,Custo), K),
 % utentes sao validos e existem.
 %
 
-uts([],[]).
-uts([I|T], L) :- utente(I,Nome,_,_), uts(T, K), L is [R|K].
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado concatenar: L1,L2,R -> {V,F}
