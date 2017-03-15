@@ -106,12 +106,6 @@ idsUt([Id|T], R) :- solucoes((IdUt), ato_medico(_,IdUt,Id,_), K),
 % Converte uma lista de ids de utentes para uma lista dos nomes desses
 % utentes
 %
-% Se permitirmos remover utentes sem precisar de remover atos medicos
-% relacionados com ele, então isto nao deve funcionar
-% Caso seja necessarios apagar os atos medicos de utente para o remover
-% entao isto nao tem problema porque se existem atos medicos os ids de
-% utentes sao validos e existem.
-%
 
 uts([],[]). 
 uts([Id|T], R) :- utente(Id,Nome,_,_), uts(T,N), R = [Nome|N].
