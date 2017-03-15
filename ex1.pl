@@ -203,6 +203,14 @@ evolucao(Termo) :- solucoes(Inv, +Termo::Inv, LInv),
 evolucao(Termo) :- retract(Termo), !, fail.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que permite a involucao do conhecimento
+
+involucao(Termo) :- solucoes(Inv, -Termo::Inv, LInv),
+					retract(Termo),
+					testa(LInv).
+involucao(Termo) :- assert(Termo), !, fail.
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que testa uma lista de invariantes
 
 testa([]).
