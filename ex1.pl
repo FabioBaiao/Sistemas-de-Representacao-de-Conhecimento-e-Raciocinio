@@ -25,22 +25,19 @@ utente(1,joao,21,bla).
 utente(2,manuel,22,bla).
 utente(3,carlos,23,bla).
 
-% Invariante:  nao permitir a insercao de conhecimento
+% Invariante Estrutural:  nao permitir a insercao de conhecimento
 %                         repetido
 
-+utente(Id,Nome,Idade,Morada) :: (solucoes((Id),utente(Id,X,Y,Z),S),
++utente(Id,Nome,Idade,Morada) :: (solucoes((Id),utente(Id,Nome,Idade,Morada),S),
 								  comprimento(S,N),
 								  N == 1
 								 ).
 
-% Invariante para impedir que se remova um utente enquanto existirem atos medicos associados a si
--utente(Id, Nome, Idade, Morada) :: ( solucoes((Id), ato_medico(D,Id, IdServ, C), S),
-									  comprimento(S,N),
-									  N == 0
-									).
+% Invariante   
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado cuidado_prestado: IdServ, Descricao, Inst, Cidade -> {V,F}
+% Extensao do predicado Cuidado Prestado: IdServ, Descricao, Inst, Cidade -> {V,F}
+
 cuidado_prestado(0, radiografia, atal, braga).
 cuidado_prestado(1, eletrocardiograma, atal, braga).
 cuidado_prestado(2, cirurgia, outra, guima).
@@ -145,18 +142,16 @@ instServTuplos([Id|T],R) :- solucoes((Inst,Serv), cuidado_prestado(Id,Serv,Inst,
 % Extensao do predicado custo: IdUt,Serv,Inst,Data,R -> {V,F}
 %
 % Calcular o custo dos atos medicos por utente/servico/instituicao/data
+%
 
-custo(IdUt, Serv, Inst, Data, Custo) :- solucoes(C, (ato_medico(Data, IdUt, Serv, C), cuidado_prestado(Serv,_,Inst,_)), S),
-										sum(S, Custo).
+custo(IdUt,Serv,Inst,Data,R) :- solucoes((IdServ), cuidado_prestado(IdServ,Serv,Inst,_), K),
+								teste(IdUt,Data,K, R).
 
-%custo(IdUt,Serv,Inst,Data,R) :- solucoes((IdServ), cuidado_prestado(IdServ,Serv,Inst,_), K),
-%								teste(IdUt,Data,K, R).
-
-%teste(_,_,[],0).
-%teste(IdUt,Data,[Id,T],R) :- solucoes((Custo), ato_medico(Data,IdUt,Id,_), K),
-%							 teste(IdUt,Data,T,X),
-%							 sum(K,N),
-%							 R is N+X.
+teste(_,_,[],0).
+teste(IdUt,Data,[Id,T],R) :- solucoes((Custo), ato_medico(Data,IdUt,Id,_), K),
+							 teste(IdUt,Data,T,X),
+							 sum(K,N),
+							 R is N+X.
 
 sum([],0).
 sum([N|Ns], T) :- sum(Ns,X), T is X+N.
@@ -211,13 +206,10 @@ evolucao(Termo) :- retract(Termo), !, fail.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite a involucao do conhecimento
 
-involucao(Termo) :- Termo,
-					solucoes(Inv, -Termo::Inv, LInv),
-					assert(temp(Termo)),
+involucao(Termo) :- solucoes(Inv, -Termo::Inv, LInv),
 					retract(Termo),
-					testa(LInv),
-					retract(temp(Termo)).
-involucao(Termo) :- temp(X), retract(temp(X)), assert(X), !, fail.
+					testa(LInv).
+involucao(Termo) :- assert(Termo), !, fail.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que testa uma lista de invariantes
