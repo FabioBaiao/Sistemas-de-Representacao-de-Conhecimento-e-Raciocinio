@@ -186,9 +186,7 @@ nao(Q).
 % Extensao do predicado solucoes: F, Q, S -> {V,F}
 
 solucoes(F,Q,S) :- Q, assert(tmp(F)), fail.
-solucoes(F,Q,S) :- 
-
-r(S, []).
+solucoes(F,Q,S) :- construir(S, []).
 
 % solucoes(F,Q,S) :- findall(F,Q,S).
 
