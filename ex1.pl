@@ -25,19 +25,22 @@ utente(1,joao,21,bla).
 utente(2,manuel,22,bla).
 utente(3,carlos,23,bla).
 
-% Invariante Estrutural:  nao permitir a insercao de conhecimento
+% Invariante:  nao permitir a insercao de conhecimento
 %                         repetido
 
-+utente(Id,Nome,Idade,Morada) :: (solucoes((Id),utente(Id,Nome,Idade,Morada),S),
++utente(Id,Nome,Idade,Morada) :: (solucoes((Id),utente(Id,X,Y,Z),S),
 								  comprimento(S,N),
 								  N == 1
 								 ).
 
-% Invariante   
+% Invariante para impedir que se remova um utente enquanto existirem atos medicos associados a si
+-utente(Id, Nome, Idade, Morada) :: ( solucoes((Id), ato_medico(D,Id, IdServ, C), S),
+									  comprimento(S,N),
+									  N == 0
+									).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado Cuidado Prestado: IdServ, Descricao, Inst, Cidade -> {V,F}
-
+% Extensao do predicado cuidado_prestado: IdServ, Descricao, Inst, Cidade -> {V,F}
 cuidado_prestado(0, radiografia, atal, braga).
 cuidado_prestado(1, eletrocardiograma, atal, braga).
 cuidado_prestado(2, cirurgia, outra, guima).
@@ -54,10 +57,10 @@ ato_medico(03/03/2017, 1, 3, 30).
 ato_medico(03/03/2017, 2, 0, 30).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado utente_select: ??? -> {V,F}
+% Extensao do predicado utente_select: IdUt, Nome, Idade, Morada, Res -> {V,F}
 %
-% indentificar utentes por critérios de selecao --- COMO ASSIM?
-%
+utente_select(IdUt, Nome, Idade, Morada, Res) :- 
+			solucoes(utente(IdUt, Nome,Idade,Morada), utente(IdUt, Nome, Idade, Morada), Res).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado instituicoes: R -> {V,F}
@@ -106,6 +109,12 @@ idsUt([Id|T], R) :- solucoes((IdUt), ato_medico(_,IdUt,Id,_), K),
 % Converte uma lista de ids de utentes para uma lista dos nomes desses
 % utentes
 %
+% Se permitirmos remover utentes sem precisar de remover atos medicos
+% relacionados com ele, então isto nao deve funcionar
+% Caso seja necessarios apagar os atos medicos de utente para o remover
+% entao isto nao tem problema porque se existem atos medicos os ids de
+% utentes sao validos e existem.
+%
 
 uts([],[]). 
 uts([Id|T], R) :- utente(Id,Nome,_,_), uts(T,N), R = [Nome|N].
@@ -137,16 +146,18 @@ instServTuplos([Id|T],R) :- solucoes((Inst,Serv), cuidado_prestado(Id,Serv,Inst,
 % Extensao do predicado custo: IdUt,Serv,Inst,Data,R -> {V,F}
 %
 % Calcular o custo dos atos medicos por utente/servico/instituicao/data
-%
 
-custo(IdUt,Serv,Inst,Data,R) :- solucoes((IdServ), cuidado_prestado(IdServ,Serv,Inst,_), K),
-								teste(IdUt,Data,K, R).
+custo(IdUt, Serv, Inst, Data, Custo) :- solucoes(C, (ato_medico(Data, IdUt, Serv, C), cuidado_prestado(Serv,_,Inst,_)), S),
+										sum(S, Custo).
 
-teste(_,_,[],0).
-teste(IdUt,Data,[Id,T],R) :- solucoes((Custo), ato_medico(Data,IdUt,Id,_), K),
-							 teste(IdUt,Data,T,X),
-							 sum(K,N),
-							 R is N+X.
+%custo(IdUt,Serv,Inst,Data,R) :- solucoes((IdServ), cuidado_prestado(IdServ,Serv,Inst,_), K),
+%								teste(IdUt,Data,K, R).
+
+%teste(_,_,[],0).
+%teste(IdUt,Data,[Id,T],R) :- solucoes((Custo), ato_medico(Data,IdUt,Id,_), K),
+%							 teste(IdUt,Data,T,X),
+%							 sum(K,N),
+%							 R is N+X.
 
 sum([],0).
 sum([N|Ns], T) :- sum(Ns,X), T is X+N.
@@ -175,7 +186,9 @@ nao(Q).
 % Extensao do predicado solucoes: F, Q, S -> {V,F}
 
 solucoes(F,Q,S) :- Q, assert(tmp(F)), fail.
-solucoes(F,Q,S) :- construir(S, []).
+solucoes(F,Q,S) :- 
+
+r(S, []).
 
 % solucoes(F,Q,S) :- findall(F,Q,S).
 
@@ -199,10 +212,13 @@ evolucao(Termo) :- retract(Termo), !, fail.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite a involucao do conhecimento
 
-involucao(Termo) :- solucoes(Inv, -Termo::Inv, LInv),
+involucao(Termo) :- Termo,
+					solucoes(Inv, -Termo::Inv, LInv),
+					assert(temp(Termo)),
 					retract(Termo),
-					testa(LInv).
-involucao(Termo) :- assert(Termo), !, fail.
+					testa(LInv),
+					retract(temp(Termo)).
+involucao(Termo) :- temp(X), retract(temp(X)), assert(X), !, fail.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que testa uma lista de invariantes
