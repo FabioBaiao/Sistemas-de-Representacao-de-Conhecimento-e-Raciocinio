@@ -54,9 +54,10 @@ ato_medico(03/03/2017, 1, 3, 30).
 ato_medico(03/03/2017, 2, 0, 30).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado utente_select: IdUt, Nome, Idade, Morada, Res -> {V,F}
+% Extensao do predicado utente_select: ??? -> {V,F}
 %
-utente_select(IdUt, Nome, Idade, Morada, Res) :- solucoes(utente(IdUt, Nome,Idade,Morada), utente(IdUt, Nome, Idade, Morada), Res).
+% indentificar utentes por critérios de selecao --- COMO ASSIM?
+%
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado instituicoes: R -> {V,F}
@@ -180,9 +181,7 @@ nao(Q).
 % Extensao do predicado solucoes: F, Q, S -> {V,F}
 
 solucoes(F,Q,S) :- Q, assert(tmp(F)), fail.
-solucoes(F,Q,S) :- 
-
-r(S, []).
+solucoes(F,Q,S) :- construir(S, []).
 
 % solucoes(F,Q,S) :- findall(F,Q,S).
 
