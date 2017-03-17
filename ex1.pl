@@ -109,7 +109,7 @@ ato_medico(03/03/2017, 2, 0, 30).
 % Extensao do predicado selecionar_utentes: IdUt, Nome, Idade, Morada, R -> {V,F}
 
 selecionar_utentes(IdUt, Nome, Idade, Morada, R) :- 
-	solucoes(utente(IdUt, Nome, Idade, Morada), utente(IdUt, Nome, Idade, Morada), R).
+	solucoes((IdUt, Nome, Idade, Morada), utente(IdUt, Nome, Idade, Morada), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado instituicoes: R -> {V,F}
