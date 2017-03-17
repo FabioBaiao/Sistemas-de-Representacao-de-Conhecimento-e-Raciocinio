@@ -84,12 +84,12 @@ cuidado_prestado(3, oncologia, clone, porto).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado ato medico: Data, IdUt, IdServ, Custo -> {V,F}
 
-ato_medico(03/03/2017, 3, 3, 30).
-ato_medico(03/03/2017, 1, 2, 30).
-ato_medico(03/03/2017, 0, 1, 30).
-ato_medico(03/03/2017, 2, 2, 30).
-ato_medico(03/03/2017, 1, 3, 30).
-ato_medico(03/03/2017, 2, 0, 30).
+ato_medico(data(3,3,2017), 3, 3, 30).
+ato_medico(data(4,3,2017), 1, 2, 30).
+ato_medico(data(5,3,2017), 0, 1, 30).
+ato_medico(data(6,3,2017), 2, 2, 30).
+ato_medico(data(7,3,2017), 1, 3, 30).
+ato_medico(data(8,3,2017), 2, 0, 30).
 
 % Invariante referencial: nao permitir a insercao de atos medicos
 %                         relativos a servicos ou utentes inexistentes
@@ -212,6 +212,24 @@ custo(IdUt, Serv, Inst, Data, R) :-
 		 S),
 	sum(S, R).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado
+% atos_medicos_interv: IdUt, Instituicao, Servico, DataIni, DataFim, R -> {V,F}
+%
+% Identificar os atos medicos realizados por utente/instituicao/servico
+% num intervalo de datas
+
+atos_medicos_interv(IdUt, Inst, Serv, Di, Df, R) :-
+	solucoes(
+		(Data, IdUt, Serv, Inst, Custo),
+		(
+			cuidado_prestado(IdServ, Serv, Inst, _),
+			ato_medico(Data, IdUt, IdServ, Custo),
+			nao(cmp_datas(Data, Di, <)),
+			nao(cmp_datas(Data, Df, >))
+		),
+		R
+	).
 /*
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado idsUt: ListaID, R -> {V,F}
@@ -256,7 +274,7 @@ sum([N|Ns], T) :- sum(Ns,X), T is X+N.
 % Extensao do predicado pertence: X, L -> {V,F}
 
 pertence(H,[H|T]).
-pertence(X,[H|T]):-
+pertence(X,[H|T]) :-
 	X \= H,
 	pertence(X,T).
 
@@ -284,6 +302,23 @@ comprimento([], 0).
 comprimento([H|T], N) :- comprimento(T,K), N is K+1.
 
 % comprimento(L,N) :- length(L,N).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado cmp_datas: Data1, Data2, R -> {V,F}
+%
+% O predicado cmp_datas compara duas datas e produz como resultado:
+%   -1 se a primeira data for anterior à segunda;
+%    0 se as datas foram iguais;
+%    1 se a primeira data for posterior à segunda.
+%
+% Nota: cada data é dada pelo predicado data: D,M,A -> {V,F}
+cmp_datas(data(D, M, A), data(D, M, A), 0).
+cmp_datas(data(D1, M, A), data(D2, M, A), R) :-
+	compare(R, D1, D2).
+cmp_datas(data(_, M1, A), data(_, M2, A), R) :-
+	compare(R, M1, M2).
+cmp_datas(data(_, _, A1), data(_, _, A2), R) :-
+	compare(R, A1, A2).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado nao: Q -> {V,F}
