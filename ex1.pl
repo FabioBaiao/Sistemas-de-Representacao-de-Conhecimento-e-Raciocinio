@@ -28,16 +28,16 @@ utente(3, carlos, 23, bla).
 % Invariante estrutural: nao permitir a insercao de conhecimento
 %                        repetido
 
-+utente(IdUt, Nome, Idade, Morada) :: (
-	solucoes(IdUt, utente(IdUt, X, Y, Z), S),
++utente(IdUt, _, _, _) :: (
+	solucoes(IdUt, utente(IdUt, _, _, _), S),
 	comprimento(S, N),
 	N == 1
 ).
 
 % Invariante referencial: nao permitir que se remova um utente enquanto
 %                         existirem atos medicos associados a si
--utente(IdUt, Nome, Idade, Morada) :: (
-	solucoes(IdUt, ato_medico(Data, IdUt, IdServ, Custo), S),
+-utente(IdUt, _, _, _) :: (
+	solucoes(IdUt, ato_medico(_, IdUt, _, _), S),
 	comprimento(S, N),
 	N == 0
 ).
@@ -53,8 +53,8 @@ cuidado_prestado(3, oncologia, clone, porto).
 % Invariante estrutural: nao permitir a insercao de conhecimento
 %                        repetido
 
-+cuidado_prestado(IdServ, Descr, Inst, Cidade) :: (
-	solucoes(IdServ, cuidado_prestado(IdServ, X, Y, Z), S),
++cuidado_prestado(IdServ, _, _, _) :: (
+	solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
 	comprimento(S, N),
 	N == 1
 ).
@@ -62,16 +62,16 @@ cuidado_prestado(3, oncologia, clone, porto).
 % Invariante estrutural: nao permitir cuidados prestados com a mesma descricao,
 %                        na mesma instituicao e cidade
 
-+cuidado_prestado(IdServ, Descr, Inst, Cidade) :: (
-	solucoes((Descr, Inst, Cidade), cuidado_prestado(X, Descr, Inst, Cidade), S),
++cuidado_prestado(_, Descr, Inst, Cidade) :: (
+	solucoes((Descr, Inst, Cidade), cuidado_prestado(_, Descr, Inst, Cidade), S),
 	comprimento(S, N),
 	N == 1
 ).
 
 % Invariante referencial: nao permitir que se remova um cuidado prestado enquanto
 %                         existirem atos medicos a ele associados
--cuidado_prestado(IdServ, Descr, Inst, Cidade) :: (
-	solucoes(IdServ, ato_medico(Data, IdUt, IdServ, Custo), S),
+-cuidado_prestado(IdServ, _, _, _) :: (
+	solucoes(IdServ, ato_medico(_, _, IdServ, _), S),
 	comprimento(S, N),
 	N == 0
 ).
@@ -100,8 +100,9 @@ selecionar_utentes(IdUt, Nome, Idade, Morada, R) :-
 % Instituicoes que prestam cuidados medicos em qualquer cidade
 %
 
-instituicoes(R) :-
-	solucoes((Inst, Cidade), cuidado_prestado(Id, Descr, Inst, Cidade), R).
+%instituicoes(R) :-
+%	solucoes((Inst, Cidade), cuidado_prestado(Id, Descr, Inst, Cidade), L),
+%	unicos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado instituicoes: Cidade, R -> {V,F}
@@ -110,7 +111,8 @@ instituicoes(R) :-
 %
 
 instituicoes(Cidade, R) :-
-	solucoes(Inst, cuidado_prestado(Id, Descr, Inst, Cidade), R).
+	solucoes((Inst, Cidade), cuidado_prestado(_, _, Inst, Cidade), L),
+	unicos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado cuidados: Instituicao, Cidade, R -> {V,F}
@@ -120,7 +122,7 @@ instituicoes(Cidade, R) :-
 %
 
 cuidados(Inst, Cidade, R) :-
-	solucoes((Descr, Inst, Cidade), cuidado_prestado(Id, Descr, Inst, Cidade), R).
+	solucoes((Descr, Inst, Cidade), cuidado_prestado(_, Descr, Inst, Cidade), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utentes_inst_serv: Instituicao, Servico, R -> {V,F}
@@ -129,13 +131,22 @@ cuidados(Inst, Cidade, R) :-
 % se a identificacao do servico for por ID entao podemos retirar a primeira verificacao
 %
 
+%utentes_inst_serv(Inst, Serv, R) :-
+%	solucoes(IdUt,
+%		 (cuidado_prestado(IdServ, Serv, Inst, _),
+%		     ato_medico(_, IdUt, IdServ, _)),
+%		 Ids),
+%	uts(Ids,L),
+%	unicos(L,R).
+
+% ALTERNATIVA
 utentes_inst_serv(Inst, Serv, R) :-
-	solucoes(
-		IdUt,
-		(cuidado_prestado(IdServ, Serv, Inst, _), ato_medico(_, IdUt, IdServ, _)),
-		Ids
-	),
-	uts(Ids,R).
+	solucoes(Nome,
+		 (cuidado_prestado(IdServ, Serv, Inst, _),
+		     ato_medico(_, IdUt, IdServ, _),
+		     utente(IdUt, Nome, _, _)),
+		 L),
+	unicos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado recorreu: IdUt,R -> {V,F}
@@ -143,15 +154,25 @@ utentes_inst_serv(Inst, Serv, R) :-
 % Identificar todas as instituicoes/servicos a que um utente ja recorreu
 %
 
-recorreu(IdUt, R) :-
-	solucoes(IdServ, ato_medico(_, IdUt, IdServ, _), K),
-	inst_serv_tuplos(K,R).
+%recorreu(IdUt, R) :-
+%	solucoes(IdServ, ato_medico(_, IdUt, IdServ, _), K),
+%	inst_serv_tuplos(K,L),
+%	unicos(L,R).
 
-inst_serv_tuplos([],[]).
-inst_serv_tuplos([Id|T], R) :-
-	solucoes((Inst, Serv), cuidado_prestado(Id, Serv, Inst, _), K),
-	inst_serv_tuplos(T,X),
-	concat(K,X,R).
+% ALTERNATIVA
+recorreu(IdUt, R) :-
+	solucoes((Inst,Serv),
+		 (ato_medico(_, IdUt, IdServ, _),
+		     cuidado_prestado(IdServ, Serv, Inst, _)),
+		 L),
+	unicos(L,R).
+
+% Se for para usar a alternativa este predicado torna-se desnecessario
+%inst_serv_tuplos([],[]).
+%inst_serv_tuplos([Id|T], R) :-
+%	solucoes((Inst, Serv), cuidado_prestado(Id, Serv, Inst, _), K),
+%	inst_serv_tuplos(T,X),
+%	concat(K,X,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado atos_medicos: IdUt, Instituicao, Servico, R -> {V,F}
@@ -160,11 +181,10 @@ inst_serv_tuplos([Id|T], R) :-
 %
 
 atos_medicos(IdUt, Inst, Serv, R) :-
-	solucoes(
-		(Data, Custo),
-		(cuidado_prestado(IdServ, Serv, Inst, _), ato_medico(Data, IdUt, IdServ, Custo)),
-		R
-	).
+	solucoes((Data, IdUt, Serv, Inst, Custo),
+		 (cuidado_prestado(IdServ, Serv, Inst, _),
+		     ato_medico(Data, IdUt, IdServ, Custo)),
+		 R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado custo: IdUt,Serv,Inst,Data,R -> {V,F}
@@ -172,9 +192,12 @@ atos_medicos(IdUt, Inst, Serv, R) :-
 % Calcular o custo dos atos medicos por utente/servico/instituicao/data
 %
 
-custo(IdUt, Serv, Inst, Data, Custo) :-
-	solucoes(C, (ato_medico(Data, IdUt, Serv, C), cuidado_prestado(Serv,_,Inst,_)), S),
-	sum(S, Custo).
+custo(IdUt, Serv, Inst, Data, R) :-
+	solucoes(C,
+		 (ato_medico(Data, IdUt, IdServ, Custo),
+		     cuidado_prestado(IdServ, Serv, Inst,_)),
+		 S),
+	sum(S, R).
 
 /*
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -201,8 +224,8 @@ idsUt([Id|T], R) :- solucoes((IdUt), ato_medico(_,IdUt,Id,_), K),
 % utentes sao validos e existem.
 %
 
-uts([],[]). 
-uts([Id|T], [Nome|Ns]) :- utente(Id,Nome,_,_), uts(T,Ns).
+%uts([],[]). 
+%uts([Id|T], [Nome|Ns]) :- utente(Id,Nome,_,_), uts(T,Ns).
 
 %custo(IdUt,Serv,Inst,Data,R) :- solucoes((IdServ), cuidado_prestado(IdServ,Serv,Inst,_), K),
 %								teste(IdUt,Data,K, R).
@@ -215,6 +238,25 @@ uts([Id|T], [Nome|Ns]) :- utente(Id,Nome,_,_), uts(T,Ns).
 
 sum([],0).
 sum([N|Ns], T) :- sum(Ns,X), T is X+N.
+
+%------------------------
+% Extensao do predicado pertence: X, L -> {V,F]}
+
+pertence(H,[H|T]).
+pertence(X,[H|T]):-
+	X \= H,
+	pertence(X,T).
+
+%-----------------------------------------------
+% Extensao do predicado unicos: L, R -> {V,F}
+
+unicos([],[]).
+unicos([H|T], [H|R]) :-
+	unicos(T,R),
+	nao(pertence(H,R)).
+unicos([H|T], R) :-
+	unicos(T,R),
+	pertence(H,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado concat: L1,L2,R -> {V,F}
