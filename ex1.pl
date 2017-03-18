@@ -20,10 +20,17 @@
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utente: IdUt, Nome, Idade, Morada -> {V,F}
 
-utente(0, jose, 55, 'Rua dos Zecas').
-utente(1, joao, 21, 'Rua de Baixo').
-utente(2, manuel, 36, 'Rua Maria Albertina').
-utente(3, carlos, 43, 'Rua da Fabrica').
+utente( 0, 'Jose',     55, 'Rua dos Zecas').
+utente( 1, 'Joao',     21, 'Rua de Baixo').
+utente( 2, 'Manuel',   36, 'Rua Maria Albertina').
+utente( 3, 'Carlos',   43, 'Rua da Fabrica').
+utente( 4, 'Maria',    73, 'Avenida Camoes').
+utente( 5, 'Joana',     8, 'Avenida Camoes').
+utente( 6, 'Fernando', 49, 'Rua da Beira').
+utente( 7, 'Joao',     29, 'Rua da Encosta').
+utente( 8, 'Ana',      40, 'Avenida Soares').
+utente( 9, 'Catarina', 17, 'Avenida Carneiro').
+utente(10, 'Maria',    33, 'Rua da Pata').
 
 % Invariante estrutural: nao permitir a insercao de conhecimento
 %                        repetido
@@ -51,10 +58,47 @@ utente(3, carlos, 43, 'Rua da Fabrica').
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado cuidado_prestado: IdServ, Descricao, Instituicao, Cidade -> {V,F}
 
-cuidado_prestado(0, radiografia, atal, braga).
-cuidado_prestado(1, eletrocardiograma, atal, braga).
-cuidado_prestado(2, cirurgia, outra, guimaraes).
-cuidado_prestado(3, oncologia, clone, porto).
+cuidado_prestado( 1, 'Cirurgia',     'Hospital Privado de Braga', 'Braga').
+cuidado_prestado( 2, 'Dermatologia', 'Hospital Privado de Braga', 'Braga').
+cuidado_prestado( 3, 'Pediatria',    'Hospital Privado de Braga', 'Braga').
+cuidado_prestado( 4, 'Pneumologia',  'Hospital Privado de Braga', 'Braga').
+cuidado_prestado( 5, 'Reumatologia', 'Hospital Privado de Braga', 'Braga').
+
+cuidado_prestado( 6,  'Cardiologia',       'Hospital de Braga', 'Braga').
+cuidado_prestado( 7,  'Cirurgia',          'Hospital de Braga', 'Braga').
+cuidado_prestado( 8,  'Eletrocardiograma', 'Hospital de Braga', 'Braga').
+cuidado_prestado( 9,  'Ortopedia',         'Hospital de Braga', 'Braga').
+cuidado_prestado(10,  'Pneumologia',       'Hospital de Braga', 'Braga').
+cuidado_prestado(11,  'Radiografia',       'Hospital de Braga', 'Braga').
+
+cuidado_prestado(12, 'Oftalmologia', 'Centro de Saude de Gualtar', 'Braga').
+cuidado_prestado(13, 'Psicologia',   'Centro de Saude de Gualtar', 'Braga').
+cuidado_prestado(14, 'Psiquiatria',  'Centro de Saude de Gualtar', 'Braga').
+
+cuidado_prestado(15, 'Cirurgia',     'Hospital de Guimaraes', 'Guimaraes').
+cuidado_prestado(16, 'Dermatologia', 'Hospital de Guimaraes', 'Guimaraes').
+cuidado_prestado(17, 'Pediatria',    'Hospital de Guimaraes', 'Guimaraes').
+cuidado_prestado(18, 'Pneumologia',  'Hospital de Guimaraes', 'Guimaraes').
+cuidado_prestado(19, 'Psiquiatria',  'Hospital de Guimaraes', 'Guimaraes').
+cuidado_prestado(20, 'Reumatologia', 'Hospital de Guimaraes', 'Guimaraes').
+
+cuidado_prestado(21, 'Cardiologia',  'Hospital da Luz de Guimaraes', 'Guimaraes').
+cuidado_prestado(22, 'Oftalmologia', 'Hospital da Luz de Guimaraes', 'Guimaraes').
+cuidado_prestado(23, 'Ortopedia',    'Hospital da Luz de Guimaraes', 'Guimaraes').
+cuidado_prestado(24, 'Radiografia',  'Hospital da Luz de Guimaraes', 'Guimaraes').
+
+cuidado_prestado(25, 'Oftalmologia', 'Centro de Saude de Azurem', 'Guimaraes').
+cuidado_prestado(26, 'Psicologia',   'Centro de Saude de Azurem', 'Guimaraes').
+
+cuidado_prestado(27, 'Cardiologia',       'Hospital de S.Joao', 'Porto').
+cuidado_prestado(28, 'Cirurgia',          'Hospital de S.Joao', 'Porto').
+cuidado_prestado(29, 'Eletrocardiograma', 'Hospital de S.Joao', 'Porto').
+cuidado_prestado(30, 'Oncologia',         'Hospital de S.Joao', 'Porto').
+cuidado_prestado(31, 'Ortopedia',         'Hospital de S.Joao', 'Porto').
+cuidado_prestado(32, 'Pediatria',         'Hospital de S.Joao', 'Porto').
+cuidado_prestado(33, 'Pneumologia',       'Hospital de S.Joao', 'Porto').
+cuidado_prestado(34, 'Radiografia',       'Hospital de S.Joao', 'Porto').
+cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
 % Invariante estrutural: nao permitir a insercao de conhecimento
 %                        repetido
@@ -84,12 +128,31 @@ cuidado_prestado(3, oncologia, clone, porto).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo -> {V,F}
 
-ato_medico(data(3,3,2017), 3, 3, 30).
-ato_medico(data(4,3,2017), 1, 2, 30).
-ato_medico(data(5,3,2017), 0, 1, 30).
-ato_medico(data(6,3,2017), 2, 2, 30).
-ato_medico(data(7,3,2017), 1, 3, 30).
-ato_medico(data(8,3,2017), 2, 0, 30).
+ato_medico(data(03,03,2017),  3,  3, 30).
+ato_medico(data(07,03,2017),  1, 20, 15).
+ato_medico(data(11,03,2017),  0, 14, 10).
+ato_medico(data(02,03,2017),  2, 16, 20).
+ato_medico(data(05,03,2017),  1, 31, 17).
+ato_medico(data(17,03,2017),  2,  7, 45).
+ato_medico(data(13,03,2017),  7, 18, 26).
+ato_medico(data(14,03,2017),  4,  6, 33).
+ato_medico(data(07,03,2017),  8, 10,  5).
+ato_medico(data(01,03,2017),  3,  2, 14).
+ato_medico(data(28,02,2017),  5, 33, 37).
+ato_medico(data(24,02,2017), 10, 26,  7).
+ato_medico(data(16,03,2017),  9, 30, 16).
+ato_medico(data(16,03,2017),  4, 16, 22).
+ato_medico(data(14,03,2017),  6,  7, 14).
+ato_medico(data(05,03,2017),  7, 19,  3).
+ato_medico(data(09,03,2017),  0, 24, 24).
+ato_medico(data(26,02,2017),  2,  5, 27).
+ato_medico(data(19,03,2017),  5, 14, 13).
+ato_medico(data(15,03,2017),  4, 13, 26).
+ato_medico(data(06,03,2017),  8, 28, 50).
+ato_medico(data(02,03,2017),  6, 34, 31).
+ato_medico(data(27,02,2017),  9,  2, 18).
+ato_medico(data(14,03,2017), 10,  1, 25).
+ato_medico(data(13,03,2017),  7, 22,  9).
 
 % Invariante referencial: nao permitir a insercao de atos medicos
 %                         relativos a servicos ou utentes inexistentes
@@ -236,7 +299,7 @@ atos_medicos(IdUt, Inst, Serv, R) :-
 
 custo(IdUt, Serv, Inst, Data, R) :-
 	solucoes(
-		C,
+		Custo,
 		(
 			ato_medico(Data, IdUt, IdServ, Custo),
 		    cuidado_prestado(IdServ, Serv, Inst,_)
@@ -314,13 +377,21 @@ pertence(X,[H|T]) :-
 %-----------------------------------------------
 % Extensao do predicado unicos: L, R -> {V,F}
 
+%unicos([],[]).
+%unicos([H|T], [H|R]) :-
+%	unicos(T,R),
+%	nao(pertence(H,R)).
+%unicos([H|T], R) :-
+%	unicos(T,R),
+%	pertence(H,R).
+
 unicos([],[]).
-unicos([H|T], [H|R]) :-
-	unicos(T,R),
-	nao(pertence(H,R)).
 unicos([H|T], R) :-
-	unicos(T,R),
-	pertence(H,R).
+	pertence(H,T),
+	unicos(T,R).
+unicos([H|T], [H|R]) :-
+	nao(pertence(H,T)),
+	unicos(T,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado concat: L1,L2,R -> {V,F}
@@ -380,26 +451,36 @@ construir(S,S).
 
 evolucao(Termo) :-
 	solucoes(Inv, +Termo::Inv, LInv),
-	assert(Termo),
+	inserir(Termo),
 	testa(LInv).
 
-evolucao(Termo) :- retract(Termo), !, fail.
+inserir(Termo) :- assert(Termo).
+inserir(Termo) :- retract(Termo), !, fail.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado que permite a involucao do conhecimento
 
+%involucao(Termo) :-
+%	Termo,
+%	solucoes(Inv, -Termo::Inv, LInv),
+%	assert(temp(Termo)),
+%	retract(Termo),
+%	testa(LInv),
+%	retract(temp(Termo)).
+
+%involucao(Termo) :-
+%	temp(X),
+%	retract(temp(X)),
+%	assert(X), !, fail.
+
 involucao(Termo) :-
 	Termo,
 	solucoes(Inv, -Termo::Inv, LInv),
-	assert(temp(Termo)),
-	retract(Termo),
-	testa(LInv),
-	retract(temp(Termo)).
+	remover(Termo),
+	testa(LInv).
 
-involucao(Termo) :-
-	temp(X),
-	retract(temp(X)),
-	assert(X), !, fail.
+remover(Termo) :- retract(Termo).
+remover(Termo) :- assert(Termo), !, fail.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado que testa uma lista de invariantes
