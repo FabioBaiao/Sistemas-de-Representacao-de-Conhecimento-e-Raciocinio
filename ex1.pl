@@ -235,11 +235,15 @@ atos_medicos(IdUt, Inst, Serv, R) :-
 %
 
 custo(IdUt, Serv, Inst, Data, R) :-
-	solucoes(C,
-		 (ato_medico(Data, IdUt, IdServ, Custo),
-		     cuidado_prestado(IdServ, Serv, Inst,_)),
-		 S),
-	sum(S, R).
+	solucoes(
+		C,
+		(
+			ato_medico(Data, IdUt, IdServ, Custo),
+		    cuidado_prestado(IdServ, Serv, Inst,_)
+		),
+		S
+	),
+	soma(S, R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado
@@ -293,11 +297,11 @@ idsUt([Id|T], R) :- solucoes((IdUt), ato_medico(_,IdUt,Id,_), K),
 %teste(_,_,[],0).
 %teste(IdUt,Data,[Id,T],R) :- solucoes((Custo), ato_medico(Data,IdUt,Id,_), K),
 %							 teste(IdUt,Data,T,X),
-%							 sum(K,N),
+%							 soma(K,N),
 %							 R is N+X.
 
-sum([],0).
-sum([N|Ns], T) :- sum(Ns,X), T is X+N.
+soma([],0).
+soma([N|Ns], T) :- soma(Ns,X), T is X+N.
 
 %------------------------
 % Extensao do predicado pertence: X, L -> {V,F}
