@@ -487,3 +487,82 @@ remover(Termo) :- assert(Termo), !, fail.
 
 testa([]).
 testa([I|T]) :- I, testa(T).
+
+
+%----------------------------------------------------------
+% Extensao do prediado profissional: IdPro, Nome, IdServ -> {V,F}
+
+profissional(1, 'Jose', [28, 15]).
+
+% Extensao de um predicado capaz de determinar que um individuo (Id, Nome) com uma lista de serviços (IdsServ),
+% é um profissional.
+% Para isso é necessário que exista um profissional com o mesmo Id e Nome e que os serviços presentes na lista de
+% serviços (IdsServ) sejam prestados por esse profissional.
+
+profissional(Id, Nome, IdsServ1) :-
+	profissional(Id, Nome, IdsServ2),
+	subconjunto(IdsServ1, IdsServ2).
+
+% Extensao do predicado subconjunto: L1, L2 -> {V,F}
+
+subconjunto([], L).
+subconjunto([H|T], L):-
+	pertence(H,L),
+	subconjunto(T,L).
+
+% Invariante estrutural: não permitir a insercao de conhecimento repetido
+
++profissional(Id, _, _) :: (
+			     solucoes(Id, profissional(Id, _, _), S),
+			     comprimento(S, N),
+			     N == 1.
+).
+
+% Invariante referencial: não permitir a inserção de profissionais relativos a serviços inexistentes
+
++profissional(_, _, IdsServ) :: (
+				  solucoes(IdServ, cuidado_prestado(IdServ, _, _, _, _), Ids),
+				  subconjunto(IdsServ,Ids).
+).
+
+% Invariante referencial: não permitir a remoçao de cuidados prestados se estiverem associados a profissionais
+
+-cuidado_prestado(Id, _, _, _) :: (
+                                    solucoes(IdsServ, profissional(_, _, IdsServ), Ids),
+                                    nao(existe(Id, Ids)).
+).
+
+
+% Extensao do predicado existe: X, LL -> {V,F}
+% Procurar um elemento numa lista de listas de elementos
+
+existe(X, [H|T]) :-
+	pertence(X,H).
+existe(X, [H|T]) :-
+	nao(pertence(X,H)),
+	existe(X,T).
+
+% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdsPro -> {V,F}
+
+ato_medico(data(03,03,2017),  3,  3, 30, [1]).
+
+
+
+ato_medico(Data, IdUt, IdServ, Custo, IdsPro1) :-
+	ato_medico(Data, IdUt, IdServ, Custo, IdsPro2),
+	subconjunto(IdsPro1, IdsPro2).
+
+% Invariante referencial: não permitir a remoção de profissionais se estiverem associados a atos medicos
+
+-profissional(Id, _, _) :: (
+			     solucoes(IdsPro, ato_medico(_, _, _, _, IdsPro), Ids),
+			     nao(existe(Id,Ids)).
+			   ).
+
+% Invariante referencial: não permitir a inserção de atos medicos relativos a profissionais inexistentes
+
++ato_medico(_, _, _, _, IdsPro) :: (
+				     solucoes(IdPro, profissional(IdPro, _, _), Ids),
+				     subconjunto(IdsPro, Ids).
+				   ).
+
