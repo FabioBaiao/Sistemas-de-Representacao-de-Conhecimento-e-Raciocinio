@@ -17,6 +17,10 @@
 :- dynamic cuidado_prestado/4.
 :- dynamic ato_medico/4.
 
+:- dynamic profissional/2.
+:- dynamic atribuido/2.
+:- dynamic ato_medico/5
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utente: IdUt, Nome, Idade, Morada -> {V,F}
 
@@ -247,7 +251,7 @@ cuidados(Inst, Cidade, R) :-
 % ALTERNATIVA
 
 utentes_inst_serv(Inst, Serv, R) :-
-	solucoes(Nome,
+	solucoes((IdUt, Nome),
 		 (cuidado_prestado(IdServ, Serv, Inst, _),
 		     ato_medico(_, IdUt, IdServ, _),
 		     utente(IdUt, Nome, _, _)),
@@ -286,9 +290,10 @@ recorreu(IdUt, R) :-
 %
 
 atos_medicos(IdUt, Inst, Serv, R) :-
-	solucoes((Data, IdUt, Serv, Inst, Custo),
+	solucoes((Data, (IdUt, Nome), Serv, Inst, Custo),
 		 (cuidado_prestado(IdServ, Serv, Inst, _),
-		     ato_medico(Data, IdUt, IdServ, Custo)),
+		     ato_medico(Data, IdUt, IdServ, Custo),
+		     utente(IdUt, Nome, _, _)),
 		 R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -395,6 +400,7 @@ unicos([H|T], [H|R]) :-
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado concat: L1,L2,R -> {V,F}
+% Acho que este predicado não esta a ser usado
 
 concat([], L2, L2).
 concat([H|T], L2, [H|L]) :- concat(T,L2,L).
@@ -489,80 +495,168 @@ testa([]).
 testa([I|T]) :- I, testa(T).
 
 
-%----------------------------------------------------------
-% Extensao do prediado profissional: IdPro, Nome, IdServ -> {V,F}
 
-profissional(1, 'Jose', [28, 15]).
+
+%----------------------------------------------------------
+% Extensao do predicado profissional: IdPro, Nome -> {V,F}
+
+profissional(1, 'Jose').
+
+% Extensao do predicado atribuido: IdPro, IdServ -> {V,F}
+
+atribuido(1, 15).
+atribuido(1, 28).
+
 
 % Extensao de um predicado capaz de determinar que um individuo (Id, Nome) com uma lista de serviços (IdsServ),
 % é um profissional.
 % Para isso é necessário que exista um profissional com o mesmo Id e Nome e que os serviços presentes na lista de
 % serviços (IdsServ) sejam prestados por esse profissional.
 
-profissional(Id, Nome, IdsServ1) :-
-	profissional(Id, Nome, IdsServ2),
-	subconjunto(IdsServ1, IdsServ2).
+%profissional(Id, Nome, IdsServ1) :-
+%	profissional(Id,Nome,IdsServ2),
+%	subconjunto(IdsServ1, IdsServ2).
 
 % Extensao do predicado subconjunto: L1, L2 -> {V,F}
 
-subconjunto([], L).
-subconjunto([H|T], L):-
-	pertence(H,L),
-	subconjunto(T,L).
+%subconjunto([], L).
+%subconjunto([H|T], L):-
+%	pertence(H,L),
+%	subconjunto(T,L).
+	
 
 % Invariante estrutural: não permitir a insercao de conhecimento repetido
 
 +profissional(Id, _, _) :: (
-			     solucoes(Id, profissional(Id, _, _), S),
+			     solucoes(Id, profissional(Id, _), S),
 			     comprimento(S, N),
-			     N == 1.
-).
+			     N == 1
+			   ).
+
+% Invariante referencial: não permitir a inserção de atribuições relativas a profissionais e/ou cuidados prestados
+% inexistentes
+
++atribuido(IdPro, IdServ) :: (
+			       solucoes(IdPro, profissional(IdPro, _), Ids1),
+			       solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), Ids2),
+			       comprimento(Ids1, N1),
+			       comprimento(Ids2, N2),
+			       N1 == 1, N2 == 1
+			     ).
+
+% Invariante estrutural: não permitir a inserção de conhecimento repetido
+
++atribuido(IdPro, IdServ) :: (
+			       solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
+			       comprimento(L, N),
+			       N == 1
+			     ).
 
 % Invariante referencial: não permitir a inserção de profissionais relativos a serviços inexistentes
 
-+profissional(_, _, IdsServ) :: (
-				  solucoes(IdServ, cuidado_prestado(IdServ, _, _, _, _), Ids),
-				  subconjunto(IdsServ,Ids).
-).
+%+profissional(_, _, IdsServ) :: (
+%				  solucoes(IdServ, cuidado_prestado(IdServ, _, _, _, _), Ids),
+%				  subconjunto(IdsServ,Ids)
+%).
 
-% Invariante referencial: não permitir a remoçao de cuidados prestados se estiverem associados a profissionais
+% Invariante referencial: não permitir a remoção de profissionais se estiverem atribuidos a cuidados_prestados
+
+-profissional(Id, _) :: (
+			  solucoes(Id, atribuido(Id, _), L),
+			  comprimento(l, N),
+			  N == 0
+			).
+
+% Invariante referencial: não permitir a remoçao de cuidados prestados se estiverem atribuidos a profissionais
 
 -cuidado_prestado(Id, _, _, _) :: (
-                                    solucoes(IdsServ, profissional(_, _, IdsServ), Ids),
-                                    nao(existe(Id, Ids)).
-).
+                                    solucoes(IdServ, atribuido(_, IdsServ), L),
+                                    comprimento(L, N),
+				    N == 0
+				  ).
 
 
 % Extensao do predicado existe: X, LL -> {V,F}
 % Procurar um elemento numa lista de listas de elementos
 
-existe(X, [H|T]) :-
-	pertence(X,H).
-existe(X, [H|T]) :-
-	nao(pertence(X,H)),
-	existe(X,T).
+%existe(X, [H|T]) :-
+%	pertence(X,H).
+%existe(X, [H|T]) :-
+%	nao(pertence(X,H)),
+%	existe(X,T).
 
-% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdsPro -> {V,F}
+% Extensao do predicado profissionais: Inst, Serv, R -> {V,F}
 
-ato_medico(data(03,03,2017),  3,  3, 30, [1]).
+profissionais(Inst, Serv, R) :-
+	solucoes((IdPro, Nome),
+		 (cuidado_prestado(IdServ, Serv, Inst, _),
+		     atribuido(IdPro, IdServ),
+		     profissional(IdPro, Nome)),
+		 L),
+	unicos(L,R).
+
+% Extensao do predicado selecionar_profissionais: IdPro, Nome -> {V,F}
+
+selecionar_profissionais(IdPro, Nome, R) :- 
+	solucoes((IdUt, Nome), profissional(IdUt, Nome), R).
 
 
 
-ato_medico(Data, IdUt, IdServ, Custo, IdsPro1) :-
-	ato_medico(Data, IdUt, IdServ, Custo, IdsPro2),
-	subconjunto(IdsPro1, IdsPro2).
+
+% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdPro -> {V,F}
+
+ato_medico(data(03,03,2017), 3, 3, 30, 1).
+
+
+
+%ato_medico(Data, IdUt, IdServ, Custo, IdsPro1) :-
+%	ato_medico(Data, IdUt, IdServ, Custo, IdsPro2),
+%	subconjunto(IdsPro1, IdsPro2).
 
 % Invariante referencial: não permitir a remoção de profissionais se estiverem associados a atos medicos
 
--profissional(Id, _, _) :: (
-			     solucoes(IdsPro, ato_medico(_, _, _, _, IdsPro), Ids),
-			     nao(existe(Id,Ids)).
-			   ).
+-profissional(Id, _) :: (
+			   solucoes(Id, ato_medico(_, _, _, _, Id), L),
+			   comprimento(L, N),
+			   N == 0
+			 ).
 
 % Invariante referencial: não permitir a inserção de atos medicos relativos a profissionais inexistentes
 
-+ato_medico(_, _, _, _, IdsPro) :: (
-				     solucoes(IdPro, profissional(IdPro, _, _), Ids),
-				     subconjunto(IdsPro, Ids).
-				   ).
++ato_medico(_, _, _, _, IdPro) :: (
+				    solucoes(IdPro, profissional(IdPro, _), L),
+				    comprimento(L,N),
+				    N == 1
+				  ).
+
+% Invariante referencial: não permitir a insercao de atos medicos relativos a profissionais que não estejam
+% atribuidos ao cuidado prestado.
+% Com este invariante, o invariante de cima torna-se desnecessario, ja que para um profissional estar atribuido a 
+% um cuidado, o profissional tem de existir
+
++ato_medico(_, _, IdServ, _, IdPro) :: (
+					 solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
+					 comprimento(L,N),
+					 N == 1
+				       ).
+
+% Extensao do predicado profissionais: Inst, Serv, R  -> {V,F}
+% Identificar os profissionais de uma instituiçao/serviço
+
+%profissionais(Inst, Serv, R) :-
+%	solucoes((IdPro, Nome),
+%		 (cuidado_prestado(IdServ, Serv, Inst, _),
+%		     profissional(_, Nome, [IdServ])),
+%		 L),
+%	unicos(L, R).
+
+% Extensao do predicado atos_medicos: IdUt, Inst, Serv, IdPro, R -> {V,F}
+
+atos_medicos(IdUt, Inst, Serv, IdPro, R) :-
+	solucoes((Data, (IdUt, NomeU), Serv, Inst, Custo, (IdPro, NomeP)),
+		 (cuidado_prestado(IdServ, Serv, Inst, _),
+		     ato_medico(Data, IdUt, IdServ, Custo, IdPro),
+		     utente(IdUt, NomeU, _, _),
+		     profissional(IdPro, NomeP)),
+		 R).
 
