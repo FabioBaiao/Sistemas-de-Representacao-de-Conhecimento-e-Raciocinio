@@ -82,7 +82,7 @@ cuidado_prestado(3, oncologia, clone, porto).
 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado ato medico: Data, IdUt, IdServ, Custo -> {V,F}
+% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo -> {V,F}
 
 ato_medico(data(3,3,2017), 3, 3, 30).
 ato_medico(data(4,3,2017), 1, 2, 30).
@@ -101,9 +101,38 @@ ato_medico(data(8,3,2017), 2, 0, 30).
 	N == 1, M == 1
 ).
 
+% Invariante ???????: o primeiro argumento do ato_medico tem de
+%                     ser o predicado data
++ato_medico(X, _, _, _) :: (e_data(X)).
+
 % Invariante ???????: o custo dos atos medicos tem de ser um numero
 %                     nao negativo
 +ato_medico(_, _, _, Custo) :: (number(Custo), Custo >= 0).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado data: D, M, A -> {V,F}
+
+data(D, M, A) :-
+	pertence(M, [1,3,5,7,8,10,12]),
+	D >= 1,
+	D =< 31.
+data(D, M, A) :-
+	pertence(M, [4,6,9,11]),
+	D >= 1,
+	D =< 30.
+data(D, 2, A) :-
+	A mod 4 =\= 0, % ano nao bissexto
+	D >= 1,
+	D =< 28.
+data(D, 2, A) :-
+	A mod 4 =:= 0,
+	D >= 1,
+	D =< 29.
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado e_data: X -> {V,F}
+
+e_data(data(D, M, A)) :- data(D, M, A).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado selecionar_utentes: IdUt, Nome, Idade, Morada, R -> {V,F}
@@ -307,18 +336,18 @@ comprimento([H|T], N) :- comprimento(T,K), N is K+1.
 % Extensao do predicado cmp_datas: Data1, Data2, R -> {V,F}
 %
 % O predicado cmp_datas compara duas datas e produz como resultado:
-%   -1 se a primeira data for anterior à segunda;
-%    0 se as datas foram iguais;
-%    1 se a primeira data for posterior à segunda.
+%   <  se a primeira data for anterior à segunda;
+%   =  se as datas foram iguais;
+%   >  se a primeira data for posterior à segunda.
 %
 % Nota: cada data é dada pelo predicado data: D,M,A -> {V,F}
-cmp_datas(data(D, M, A), data(D, M, A), 0).
+
+cmp_datas(data(_, _, A1), data(_, _, A2), R) :-
+	A1 \= A2, compare(R, A1, A2).
+cmp_datas(data(_, M1, A), data(_, M2, A), R) :-
+	M1 \= M2, compare(R, M1, M2).
 cmp_datas(data(D1, M, A), data(D2, M, A), R) :-
 	compare(R, D1, D2).
-cmp_datas(data(_, M1, A), data(_, M2, A), R) :-
-	compare(R, M1, M2).
-cmp_datas(data(_, _, A1), data(_, _, A2), R) :-
-	compare(R, A1, A2).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado nao: Q -> {V,F}
