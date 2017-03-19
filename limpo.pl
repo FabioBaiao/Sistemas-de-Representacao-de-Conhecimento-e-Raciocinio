@@ -521,6 +521,12 @@ atribuido(13, 24).
 	N == 1
 ).
 
+% 
+
+-atribuicao(IdPro, IdServ) :: (
+    nao(ato_medico(_, _, IdServ, _, IdPro)
+).
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado profissionais: Inst, Serv, R -> {V,F}
