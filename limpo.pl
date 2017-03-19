@@ -43,8 +43,8 @@ utente(10, 'Maria',    33, 'Rua da Pata').
 	N == 1
 ).
 
-% Invariante ??????: a idade de cada utente tem de ser inteira e
-%                    estar no intervalo fechado [0,150]
+% Invariante: a idade de cada utente tem de ser inteira e
+%             estar no intervalo fechado [0,150]
 
 +utente(_, _, Idade, _) :: (
 	integer(Idade),
@@ -55,9 +55,7 @@ utente(10, 'Maria',    33, 'Rua da Pata').
 %                         existirem atos medicos associados a si
 
 -utente(IdUt, _, _, _) :: (
-	solucoes(IdUt, ato_medico(_, IdUt, _, _, _), S),
-	comprimento(S, N),
-	N == 0
+	nao(ato_medico(_, IdUt, _, _, _))
 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -105,8 +103,7 @@ cuidado_prestado(33, 'Pneumologia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(34, 'Radiografia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
-% Invariante estrutural: nao permitir a insercao de conhecimento
-%                        repetido
+% Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
 +cuidado_prestado(IdServ, _, _, _) :: (
 	solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
@@ -127,18 +124,15 @@ cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 %                         existirem atos medicos a ele associados
 
 -cuidado_prestado(IdServ, _, _, _) :: (
-	solucoes(IdServ, ato_medico(_, _, IdServ, _, _), S),
-	comprimento(S, N),
-	N == 0
+	nao(ato_medico(_, _, IdServ, _, _))
 ).
 
-% Invariante referencial: não permitir a remoçao de cuidados prestados se estiverem atribuidos a profissionais
+% Invariante referencial: nao permitir a remocao de cuidados prestados se
+%                         estiverem atribuidos a profissionais
 
--cuidado_prestado(Id, _, _, _) :: (
-                                    solucoes(IdServ, atribuido(_, IdsServ), L),
-                                    comprimento(L, N),
-				    N == 0
-				  ).
+-cuidado_prestado(IdServ, _, _, _) :: (
+	nao(atribuido(_, IdServ))
+).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdPro -> {V,F}
@@ -173,15 +167,11 @@ ato_medico(data(13,03,2017),  7, 22,  9,  9).
 %                         relativos a servicos ou utentes inexistentes
 
 +ato_medico(_, IdUt, IdServ, _, _) :: (
-	solucoes(IdUt, utente(IdUt, _, _, _), R1),
-	solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), R2),
-	comprimento(R1, N),
-	comprimento(R2, M),
-	N == 1, M == 1
+	utente(IdUt, _, _, _),
+	cuidado_prestado(IdServ, _, _, _)
 ).
 
-% Invariante ???????: o primeiro argumento do ato_medico tem de
-%                     ser o predicado data
+% Invariante: o primeiro argumento do ato_medico tem de ser o predicado data
 
 +ato_medico(X, _, _, _, _) :: (e_data(X)).
 
@@ -190,25 +180,16 @@ ato_medico(data(13,03,2017),  7, 22,  9,  9).
 
 +ato_medico(_, _, _, Custo, _) :: (number(Custo), Custo >= 0).
 
-% Invariante referencial: não permitir a inserção de atos medicos relativos a profissionais inexistentes
+% Invariante referencial: nao permitir a insercao de atos medicos relativos a profissionais inexistentes
 
-+ato_medico(_, _, _, _, IdPro) :: (
-				    solucoes(IdPro, profissional(IdPro, _, _, _), L),
-				    comprimento(L,N),
-				    N == 1
-				  ).
++ato_medico(_, _, _, _, IdPro) :: (profissional(IdPro, _, _, _)).
 
-% Invariante referencial: não permitir a insercao de atos medicos relativos a profissionais que não estejam
+% Invariante referencial: nao permitir a insercao de atos medicos relativos a profissionais que nao estejam
 % atribuidos ao cuidado prestado.
 % Com este invariante, o invariante de cima torna-se desnecessario, ja que para um profissional estar atribuido a 
 % um cuidado, o profissional tem de existir
 
-+ato_medico(_, _, IdServ, _, IdPro) :: (
-					 solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
-					 comprimento(L,N),
-					 N == 1
-				       ).
-
++ato_medico(_, _, IdServ, _, IdPro) :: (atribuido(IdPro, IdServ)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado data: D, M, A -> {V,F}
@@ -265,11 +246,15 @@ cuidados(Inst, Cidade, R) :-
 % Identificar os utentes de uma instituicao/servico
 
 utentes_inst_serv(Inst, Serv, R) :-
-	solucoes((IdUt, Nome),
-		 (cuidado_prestado(IdServ, Serv, Inst, _),
-		     ato_medico(_, IdUt, IdServ, _, _),
-		     utente(IdUt, Nome, _, _)),
-		 L),
+	solucoes(
+		(IdUt, Nome),
+		(
+			cuidado_prestado(IdServ, Serv, Inst, _),
+		    ato_medico(_, IdUt, IdServ, _, _),
+		    utente(IdUt, Nome, _, _)
+		),
+		L
+	),
 	unicos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -278,10 +263,14 @@ utentes_inst_serv(Inst, Serv, R) :-
 % Identificar todas as instituicoes/servicos a que um utente ja recorreu
 
 recorreu(IdUt, R) :-
-	solucoes((Inst,Serv),
-		 (ato_medico(_, IdUt, IdServ, _),
-		     cuidado_prestado(IdServ, Serv, Inst, _)),
-		 L),
+	solucoes(
+		(Inst,Serv),
+		(
+			ato_medico(_, IdUt, IdServ, _),
+		 	cuidado_prestado(IdServ, Serv, Inst, _)
+		),
+		L
+	),
 	unicos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -291,12 +280,16 @@ recorreu(IdUt, R) :-
 %
 
 atos_medicos(IdUt, Inst, Serv, IdPro, R) :-
-	solucoes((Data, (IdUt, NomeU), Serv, Inst, Custo, (IdPro, NomeP)),
-		 (cuidado_prestado(IdServ, Serv, Inst, _),
-		     ato_medico(Data, IdUt, IdServ, Custo, IdPro),
-		     utente(IdUt, NomeU, _, _),
-		     profissional(IdPro, NomeP, _, _)),
-		 R).
+	solucoes(
+		(Data, (IdUt, NomeU), Serv, Inst, Custo, (IdPro, NomeP)),
+		(
+			cuidado_prestado(IdServ, Serv, Inst, _),
+			ato_medico(Data, IdUt, IdServ, Custo, IdPro),
+			utente(IdUt, NomeU, _, _),
+		    profissional(IdPro, NomeP, _, _)
+		),
+		R
+	).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado custo: IdUt,Serv,Inst,Data,R -> {V,F}
@@ -308,8 +301,8 @@ custo(IdUt, Serv, Inst, Data, R) :-
 	solucoes(
 		Custo,
 		(
-			ato_medico(Data, IdUt, IdServ, Custo, _),
-		    cuidado_prestado(IdServ, Serv, Inst,_)
+			cuidado_prestado(IdServ, Serv, Inst,_),
+			ato_medico(Data, IdUt, IdServ, Custo, _)
 		),
 		S
 	),
@@ -339,16 +332,16 @@ atos_medicos_interv(IdUt, Inst, Serv, Di, Df, R) :-
 soma([],0).
 soma([N|Ns], T) :- soma(Ns,X), T is X+N.
 
-%------------------------
-% Extensao do predicado pertence: X, L -> {V,F}
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado utente: X, L -> {V,F}
 
 pertence(H,[H|T]).
 pertence(X,[H|T]) :-
 	X \= H,
 	pertence(X,T).
 
-%-----------------------------------------------
-% Extensao do predicado unicos: L, R -> {V,F}
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado utente: L, R -> {V,F}
 
 unicos([],[]).
 unicos([H|T], R) :-
@@ -367,7 +360,7 @@ comprimento([H|T], N) :- comprimento(T,K), N is K+1.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado cmp_datas: Data1, Data2, R -> {V,F}
 %
-% O predicado cmp_datas compara duas datas e produz como resultado:
+% O predicado cmp_datas compara duas datas. O resultado da comparacao e:
 %   <  se a primeira data for anterior à segunda;
 %   =  se as datas foram iguais;
 %   >  se a primeira data for posterior à segunda.
@@ -398,7 +391,6 @@ solucoes(F,Q,S) :- construir(S, []).
 
 construir(S1, S2) :-
 	retract(tmp(X)), !, construir(S1, [X|S2]).
-
 construir(S,S).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -430,10 +422,7 @@ remover(Termo) :- assert(Termo), !, fail.
 testa([]).
 testa([I|T]) :- I, testa(T).
 
-
-
-
-%----------------------------------------------------------
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado profissional: IdPro, Nome, Idade, Morada -> {V,F}
 
 profissional( 1, 'Jose',      45, 'Rua ').
@@ -450,30 +439,27 @@ profissional(11, 'Vitor',     56, 'Avenida ').
 profissional(12, 'Luisa',     60, 'Rua ').
 profissional(13, 'Ines',      53, 'Rua ').
 
-% Invariante estrutural: não permitir a insercao de conhecimento repetido
+% Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
 +profissional(Id, _, _, _) :: (
-			     solucoes(Id, profissional(Id, _, _, _), S),
-			     comprimento(S, N),
-			     N == 1
-			   ).
+	solucoes(Id, profissional(Id, _, _, _), S),
+	comprimento(S, N),
+	N == 1
+).
 
-% Invariante referencial: não permitir a remoção de profissionais se estiverem atribuidos a cuidados_prestados
-
--profissional(Id, _, _, _) :: (
-			  solucoes(Id, atribuido(Id, _), L),
-			  comprimento(l, N),
-			  N == 0
-			      ).
-
-% Invariante referencial: não permitir a remoção de profissionais se estiverem associados a atos medicos
+% Invariante referencial: nao permitir a remocao de profissionais se estiverem atribuidos a cuidados_prestados
 
 -profissional(Id, _, _, _) :: (
-			   solucoes(Id, ato_medico(_, _, _, _, Id), L),
-			   comprimento(L, N),
-			   N == 0
-			 ).
+	nao(atribuido(Id, _))
+).
 
+% Invariante referencial: nao permitir a remocao de profissionais se estiverem associados a atos medicos
+
+-profissional(Id, _, _, _) :: (
+	nao(ato_medico(_, _, _, _, Id))
+).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado atribuido: IdPro, IdServ -> {V,F}
 
 atribuido( 1, 15).
@@ -517,38 +503,41 @@ atribuido(13, 30).
 atribuido(13, 24).
 
 
-% Invariante referencial: não permitir a inserção de atribuições relativas a profissionais e/ou cuidados prestados
-% inexistentes
+% Invariante referencial: nao permitir a insercao de atribuicoes relativas
+%                         a profissionais e/ou cuidados prestados inexistentes
 
 +atribuido(IdPro, IdServ) :: (
-			       solucoes(IdPro, profissional(IdPro, _, _, _), Ids1),
-			       solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), Ids2),
-			       comprimento(Ids1, N1),
-			       comprimento(Ids2, N2),
-			       N1 == 1, N2 == 1
-			     ).
+	profissional(IdPro, _, _, _),
+	cuidado_prestado(IdServ, _, _, _)
+).
 
-% Invariante estrutural: não permitir a inserção de conhecimento repetido
+% Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
 +atribuido(IdPro, IdServ) :: (
-			       solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
-			       comprimento(L, N),
-			       N == 1
-			     ).
+	solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
+	comprimento(L, N),
+	N == 1
+).
 
 
-% -----------------------------------------------------------
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado profissionais: Inst, Serv, R -> {V,F}
+% Calcula a lista de profissionais de uma instituicao/servico
 
 profissionais(Inst, Serv, R) :-
-	solucoes((IdPro, Nome),
-		 (cuidado_prestado(IdServ, Serv, Inst, _),
-		     atribuido(IdPro, IdServ),
-		     profissional(IdPro, Nome, _, _)),
-		 L),
+	solucoes(
+		(IdPro, Nome),
+		(
+			cuidado_prestado(IdServ, Serv, Inst, _),
+		    atribuido(IdPro, IdServ),
+		    profissional(IdPro, Nome, _, _)
+		),
+		L
+	),
 	unicos(L,R).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado selecionar_profissionais: IdPro, Nome, Idade, Morada -> {V,F}
 
 selecionar_profissionais(IdPro, Nome, Idade, Morada, R) :- 
-	solucoes((IdUt, Nome, Idade, Morada), profissional(IdUt, Nome, Idade, Morada), R).
+	solucoes((IdPro, Nome, Idade, Morada), profissional(IdPro, Nome, Idade, Morada), R).
