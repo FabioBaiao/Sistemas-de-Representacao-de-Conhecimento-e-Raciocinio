@@ -1,2 +1,2 @@
 # srcr_assignment
-Assignment for SRCR
+Trabalho prático para Sistemas de Representação de Conhecimento e Raciocínio (2017)
