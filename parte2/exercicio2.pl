@@ -10,6 +10,15 @@
 :- op( 900, xfy, '::' ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do meta-predicado utente :: IdUt, Nome, Idade, Morada -> {V,F,D}
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do meta-predicado cuidado_prestado :: IdServ, Descricao, Instituicao, Cidade -> {V,F,D}
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do meta-predicado ato_medico :: Data, IdUt, IdServ, Custo -> {V,F,D}
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do meta-predicado nao:: Questão -> {V,F}
 nao( Q ) :- Q, !, fail.
 nao( Q ).
