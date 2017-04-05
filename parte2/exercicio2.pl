@@ -94,9 +94,16 @@ cuidado_prestado(33, 'Pneumologia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(34, 'Radiografia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado ato_medico :: Data, IdUt, IdServ, Custo -> {V,F,D}
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado doenca :: IdDoenca, Designacao, Designacao -> {V,F,D}
+doenca( 1, 'SIDA', 'Uma camisinha nunca fez mal a ninguém' ).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado diagnostico :: IdUtente, IdDoenca -> {V,F,D}
+diagnostico( 2, 1 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do meta-predicado nao:: Questão -> {V,F}
