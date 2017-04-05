@@ -14,7 +14,7 @@
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SICStus PROLOG: definicoes iniciais
 :- op( 900, xfy, '&&' ). % operador para conjuncao de questoes
-:- op( 900, xfy, ';;' ). % operador para disjuncao de questoes
+:- op( 900, xfy, '$$' ). % operador para disjuncao de questoes
 :- op( 900, xfy, '::' ).
 
 % :- dynamic utente/4.
@@ -61,12 +61,15 @@ demo( P && X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido )
 demo( P && X, desconhecido ) :- demo( P, desconhecido ), demo( X, verdadeiro ).
 demo( P && X, desconhecido ) :- demo( P, verdadeiro ), demo( X, desconhecido ).
 
-demo( P ;; X, verdadeiro ) :- demo( P, verdadeiro ).
-demo( P ;; X, verdadeiro ) :- demo( X, verdadeiro ).
-demo( P ;; X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido ).
-demo( P ;; X, desconhecido ) :- demo( P, falso ), demo( X, desconhecido ).
-demo( P ;; X, desconhecido ) :- demo( P, desconhecido ), demo( X, falso ).
-demo( P ;; X, falso ) :- demo( P, falso ), demo( X, falso ).
+demo( P $$ X, verdadeiro ) :- demo( P, verdadeiro ).
+demo( P $$ X, verdadeiro ) :- demo( X, verdadeiro ).
+demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido ).
+demo( P $$ X, desconhecido ) :- demo( P, falso ), demo( X, desconhecido ).
+demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, falso ).
+demo( P $$ X, falso ) :- demo( P, falso ), demo( X, falso ).
+
+demo(t, verdadeiro).
+demo(f,falso).
 
 demo( P , verdadeiro ) :- P.
 demo( P, falso ) :- -P.
