@@ -16,6 +16,9 @@
 :- op( 900, xfy, '&&' ). % operador para conjuncao de questoes
 :- op( 900, xfy, '$$' ). % operador para disjuncao de questoes
 :- op( 900, xfy, '::' ).
+:- op( 900, xfy, '::>' ).
+:- op( 900, xfy, '<::' ).
+:- op( 900, xfy, '==>' ).
 
 % :- dynamic utente/4.
 % :- dynamic cuidado_prestado/4.
@@ -95,15 +98,41 @@ cuidado_prestado(34, 'Radiografia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado ato_medico :: Data, IdUt, IdServ, Custo -> {V,F,D}
+% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdPro -> {V,F,D} 
+ato_medico(data(03,03,2017),  3,  3, 30, 12).
+ato_medico(data(07,03,2017),  1, 20, 15,  5).
+ato_medico(data(11,03,2017),  0, 14, 10,  3).
+ato_medico(data(02,03,2017),  2, 16, 20,  8).
+ato_medico(data(05,03,2017),  1, 31, 17,  9).
+ato_medico(data(17,03,2017),  2,  7, 45,  8).
+ato_medico(data(13,03,2017),  7, 18, 26,  8).
+ato_medico(data(14,03,2017),  4,  6, 33, 10).
+ato_medico(data(07,03,2017),  8, 10,  5,  9).
+ato_medico(data(01,03,2017),  3,  2, 14,  9).
+ato_medico(data(28,02,2017),  5, 33, 37, 12).
+ato_medico(data(24,02,2017), 10, 26,  7,  4).
+ato_medico(data(16,03,2017),  9, 30, 16, 13).
+ato_medico(data(16,03,2017),  4, 16, 22,  8).
+ato_medico(data(14,03,2017),  6,  7, 14,  8).
+ato_medico(data(05,03,2017),  7, 19,  3,  9).
+ato_medico(data(09,03,2017),  0, 24, 24, 10).
+ato_medico(data(26,02,2017),  2,  5, 27,  3).
+ato_medico(data(19,03,2017),  5, 14, 13,  3).
+ato_medico(data(15,03,2017),  4, 13, 26,  7).
+ato_medico(data(06,03,2017),  8, 28, 50,  5).
+ato_medico(data(02,03,2017),  6, 34, 31,  2).
+ato_medico(data(27,02,2017),  9,  2, 18,  9).
+ato_medico(data(14,03,2017), 10,  1, 25,  2).
+ato_medico(data(13,03,2017),  7, 22,  9,  9).
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado doenca :: IdDoenca, Designacao, Designacao -> {V,F,D}
+% Extensao do predicado doenca :: IdDoenca, Designacao, Descrição -> {V,F,D}
 doenca( 1, 'SIDA', 'Uma camisinha nunca fez mal a ninguém' ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado diagnostico :: IdUtente, IdDoenca -> {V,F,D}
-diagnostico( 2, 1 ).
+diagnostico( 2, 1 ).  
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do meta-predicado nao:: Questão -> {V,F}
@@ -134,7 +163,13 @@ demo( P, falso ) :- -P.
 demo( P, desconhecido ) :- nao( P ), nao( -P ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do meta-predicado evolucao :: ?? 
+% Extensao do meta-predicado evolucaoPerfeito :: Termo -> {V,F} 
+% IMPORTANTE: a partir de agora os invariantes sao verificados antes
+evolucaoPerfeito( Termo ) :- 
+	solucoes( Inv, +Termo::Inv, LInv ),
+	testa(LInv),
+	% verificar conhecimento imperfeito e remover se necessario
+	assert(Termo).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do meta-predicado involucao :: ?? 
@@ -714,34 +749,6 @@ atribuido(13, 24).
 
 
 
-
-% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdPro -> {V,F}
-
-ato_medico(data(03,03,2017),  3,  3, 30, 12).
-ato_medico(data(07,03,2017),  1, 20, 15,  5).
-ato_medico(data(11,03,2017),  0, 14, 10,  3).
-ato_medico(data(02,03,2017),  2, 16, 20,  8).
-ato_medico(data(05,03,2017),  1, 31, 17,  9).
-ato_medico(data(17,03,2017),  2,  7, 45,  8).
-ato_medico(data(13,03,2017),  7, 18, 26,  8).
-ato_medico(data(14,03,2017),  4,  6, 33, 10).
-ato_medico(data(07,03,2017),  8, 10,  5,  9).
-ato_medico(data(01,03,2017),  3,  2, 14,  9).
-ato_medico(data(28,02,2017),  5, 33, 37, 12).
-ato_medico(data(24,02,2017), 10, 26,  7,  4).
-ato_medico(data(16,03,2017),  9, 30, 16, 13).
-ato_medico(data(16,03,2017),  4, 16, 22,  8).
-ato_medico(data(14,03,2017),  6,  7, 14,  8).
-ato_medico(data(05,03,2017),  7, 19,  3,  9).
-ato_medico(data(09,03,2017),  0, 24, 24, 10).
-ato_medico(data(26,02,2017),  2,  5, 27,  3).
-ato_medico(data(19,03,2017),  5, 14, 13,  3).
-ato_medico(data(15,03,2017),  4, 13, 26,  7).
-ato_medico(data(06,03,2017),  8, 28, 50,  5).
-ato_medico(data(02,03,2017),  6, 34, 31,  2).
-ato_medico(data(27,02,2017),  9,  2, 18,  9).
-ato_medico(data(14,03,2017), 10,  1, 25,  2).
-ato_medico(data(13,03,2017),  7, 22,  9,  9).
 
 
 
