@@ -15,10 +15,7 @@
 :- op(900, xfy, '::').
 :- op( 900, xfy, '&&' ). % operador para conjuncao de questoes
 :- op( 900, xfy, '$$' ). % operador para disjuncao de questoes
-:- op( 900, xfy, '::>' ).
-:- op( 900, xfy, '<::' ).
 :- op( 900, xfy, '==>' ).
-
 
 :- dynamic utente/4.
 :- dynamic cuidado_prestado/4.
@@ -664,14 +661,18 @@ selecionar_profissionais(IdPro, Nome, Idade, Morada, R) :-
 demo( P && X, verdadeiro ) :- demo( P, verdadeiro ), demo( X, verdadeiro ).
 demo( P && X, falso ) :- demo( P, falso ).
 demo( P && X, falso ) :- demo( X, falso ).
-demo( P && X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido ).
-demo( P && X, desconhecido ) :- demo( P, desconhecido ), demo( X, verdadeiro ).
+%demo( P && X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido ).
+%demo( P && X, desconhecido ) :- demo( P, desconhecido ), demo( X, verdadeiro ).
+%demo( P && X, desconhecido ) :- demo( P, verdadeiro ), demo( X, desconhecido ).
+
+demo( P && X, desconhecido ) :- demo( P, desconhecido ), nao( demo( X, falso ) ).
 demo( P && X, desconhecido ) :- demo( P, verdadeiro ), demo( X, desconhecido ).
 
 demo( P $$ X, verdadeiro ) :- demo( P, verdadeiro ).
 demo( P $$ X, verdadeiro ) :- demo( X, verdadeiro ).
-demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido ).
-demo( P $$ X, desconhecido ) :- demo( P, falso ), demo( X, desconhecido ).
+%demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, desconhecido ).
+%demo( P $$ X, desconhecido ) :- demo( P, falso ), demo( X, desconhecido ).
+demo( P $$ X, desconhecido ) :- nao( demo( P, verdadeiro ) ), demo( X, desconhecido ).
 demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, falso ).
 demo( P $$ X, falso ) :- demo( P, falso ), demo( X, falso ).
 
