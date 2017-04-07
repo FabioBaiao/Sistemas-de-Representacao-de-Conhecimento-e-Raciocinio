@@ -158,7 +158,7 @@ cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 +(-cuidado_prestado(IdServ, _, _, _)) :: (
 					  solucoes(IdServ, -cuidado_prestado(IdServ, _, _, _), S),
 					  comprimento(S, N),
-					  N == 1).
+					  N == 0).
 
 
 
