@@ -44,43 +44,48 @@ utente(10, 'Maria',    33, 'Rua da Pata').
 % Com o invariante abaixo (que considera a negacao forte "geral") penso que este primeiro invariante
 %  é desnecessario
 
-+(-utente(IdUt, _, _, _)) :: (nao( utente(IdUt, _, _, _))).
+%+(-utente(IdUt, _, _, _)) :: (nao( utente(IdUt, _, _, _))).
 
 %			       solucoes(IdUt, utente(IdUt, _ ,_ , _), S),
 %			       comprimento(S, N),
 %			       N == 0).
 
-+utente(IdUt, _, _, _) :: (nao( -utente(IdUt, _, _, _))).
+% PARTE II
+% Invariante referencial: nao existe conhecimento negativo, nem positivo, nem excecoes
+%  o N == 1, serve para verificar que apenas existe o caso geral do negativo (que permite
+%   chegar à conclusao da primeira frase
 
-%			       solucoes(IdUt, -utente(IdUt, _ ,_ , _), S),
-%			       comprimento(S, N),
-%			       N == 0).
++utente(IdUt, _, _, _) :: (
+			    solucoes(IdUt, -utente(IdUt, _ ,_ , _), S),
+			    comprimento(S, N),
+			    N == 1).
+
 
 % PARTE II
-% Invariante estrutural: nao permitir a insercao de conhecimento negativo repetido
-% N == 2, pois apenas pode haver o que esta a ser inserido e o "geral"
+% Invariante estrutural: nao existe conhecimento negativo, nem positivo, nem excecoes
+%  N == 1, pois apenas pode haver o caso "geral"
 
-+(-utente(IdUt, _, _, _)) :: (
-			       solucoes(IdUt, -utente(IdUt, _, _, _), S),
++(-utente(IdUt, Nome, Idade, Morada)) :: (
+			       solucoes(IdUt, -utente(IdUt, Nome, Idade, Morada), S),
 			       comprimento(S, N),
-			       N == 2).
+			       N == 1).
 
 % Invariante estrutural: nao permitir a insercao de conhecimento
 %                        repetido
 
-+utente(IdUt, _, _, _) :: (
-	solucoes(IdUt, utente(IdUt, _, _, _), S),
-	comprimento(S, N),
-	N == 1
-).
+%+utente(IdUt, _, _, _) :: (
+%	solucoes(IdUt, utente(IdUt, _, _, _), S),
+%	comprimento(S, N),
+%	N == 1
+%).
 
 % Invariante: a idade de cada utente tem de ser inteira e
 %             estar no intervalo fechado [0,150]
 
-+utente(_, _, Idade, _) :: (
-	integer(Idade),
-	Idade >= 0, Idade =< 150
-).
+%+utente(_, _, Idade, _) :: (
+%	integer(Idade),
+%	Idade >= 0, Idade =< 150
+%).
 			       
 
 % Invariante referencial: nao permitir que se remova um utente enquanto
@@ -137,22 +142,21 @@ cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
-+cuidado_prestado(IdServ, _, _, _) :: (
-	solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
-	comprimento(S, N),
-	N == 1
-).
+%+cuidado_prestado(IdServ, _, _, _) :: (
+%	solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
+%	comprimento(S, N),
+%	N == 1
+%).
 
 % PARTE II
 % Ivariantes estruturais: nao permitir a insercao de conhecimento contraditorio
 
-+cuidado_prestado(IdServ, _, _, _) :: (nao(-cuidado_prestado(IdServ, _, _, _))).
++cuidado_prestado(IdServ, _, _, _) :: (
+					solucoes(IdServ, -cuidado_prestado(IdServ, _, _, _), S),
+					comprimento(S, N),
+					N == 1).
 
-%					solucoes(IdServ, -cuidado_prestado(IdServ, _, _, _), S),
-%					comprimento(S, N),
-%					N == 0).
-
-+(-cuidado_prestado(IdServ, _, _, _)) :: (nao(cuidados_prestado(IdServ, _, _, _))).
+%+(-cuidado_prestado(IdServ, _, _, _)) :: (nao(cuidados_prestado(IdServ, _, _, _))).
 
 %					  solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
 %					  comprimento(S, N),
@@ -161,10 +165,10 @@ cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 % PARTE II
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
  
-+(-cuidado_prestado(IdServ, _, _, _)) :: (
-					  solucoes(IdServ, -cuidado_prestado(IdServ, _, _, _), S),
++(-cuidado_prestado(IdServ, Descr, Inst, Cidade)) :: (
+					  solucoes(IdServ, -cuidado_prestado(IdServ, Descr, Inst, Cidade), S),
 					  comprimento(S, N),
-					  N == 2).
+					  N == 1).
 
 
 
@@ -455,11 +459,12 @@ construir(S,S).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado que permite a evolucao do conhecimento
+% ALTERADO PARA A PARTE II
 
 evolucao(Termo) :-
 	solucoes(Inv, +Termo::Inv, LInv),
-	inserir(Termo),
-	testa(LInv).
+	testa(LInv),
+	assert(Termo).
 
 inserir(Termo) :- assert(Termo).
 inserir(Termo) :- retract(Termo), !, fail.
@@ -502,22 +507,21 @@ profissional(13, 'Ines',      53, 'Rua da Pedra').
 
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
-+profissional(Id, _, _, _) :: (
-	solucoes(Id, profissional(Id, _, _, _), S),
-	comprimento(S, N),
-	N == 1
-			      ).
+%+profissional(Id, _, _, _) :: (
+%	solucoes(Id, profissional(Id, _, _, _), S),
+%	comprimento(S, N),
+%	N == 1
+%			      ).
 
 % PARTE II
 % Invariantes estruturais: nao permitir a insercao de conhecimento contraditorio
 
-+profissional(IdPro, _, _, _) :: (nao(-profissional(IdPro, _, _, _))).
++profissional(IdPro, _, _, _) :: (
+				   solucoes(IdPro, -profissional(IdPro, _, _, _), S),
+				   comprimento(S, N),
+				   N == 1).
 
-%				   solucoes(IdPro, -profissional(IdPro, _, _, _), S),
-%				   comprimento(S, N),
-%				   N == 0).
-
-+(-profissional(IdPro, _, _, _)) :: (nao(profissional(IdPro, _, _, _))).
+%+(-profissional(IdPro, _, _, _)) :: (nao(profissional(IdPro, _, _, _))).
 
 %				      solucoes(IdPro, profissional(IdPro, _, _, _), S),
 %				      comprimento(S, N),
@@ -526,10 +530,10 @@ profissional(13, 'Ines',      53, 'Rua da Pedra').
 % PARTE II
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
-+(-profissional(IdPro, _, _, _)) :: (
-                      solucoes(IdPro, -profissional(IdPro, _, _, _), S),
++(-profissional(IdPro, Nome, Idade, Morada)) :: (
+                      solucoes(IdPro, -profissional(IdPro, Nome, Idade, Morada), S),
                       comprimento(S, N),
-                      N == 2).
+                      N == 1).
 
 % Invariante referencial: nao permitir a remocao de profissionais se estiverem atribuidos a cuidados_prestados
 
@@ -599,13 +603,12 @@ atribuido(13, 24).
 % Invariantes estruturais: nao permitir a insercao de conhecimento 
 %                          contraditorio
 
-+atribuido(IdPro, IdServ) :: (nao(-atribuido(IdPro, IdServ))).
++atribuido(IdPro, IdServ) :: (
+			       solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
+			       comprimento(S, N),
+			       N == 1).
 
-%			       solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
-%			       comprimento(S, N),
-%			       N == 0).
-
-+(-atribuido(IdPro, IdServ)) :: (nao(atribuido(IdPro, IdServ))).
+%+(-atribuido(IdPro, IdServ)) :: (nao(atribuido(IdPro, IdServ))).
 
 %				  solucoes((IdPro,IdServ), atribuido(IdPro, IdServ), S),
 %				  comprimento(S, N),
@@ -618,16 +621,16 @@ atribuido(13, 24).
 +(-atribuido(IdPro, IdServ)) :: (
                       solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
                       comprimento(S, N),
-                      N == 2).
+                      N == 1).
 
 
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
-+atribuido(IdPro, IdServ) :: (
-	solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
-	comprimento(L, N),
-	N == 1
-).
+%+atribuido(IdPro, IdServ) :: (
+%	solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
+%	comprimento(L, N),
+%	N == 1
+%).
 
 % Invariante referencial: nao permitir a remocao de atribuicoes se exisitrem atos medicos 
 %                         que "dependam" dessa atribuicao
