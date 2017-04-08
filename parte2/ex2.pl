@@ -477,7 +477,7 @@ inserir(Termo) :- retract(Termo), !, fail.
 involucao(Termo) :-
 	Termo,
 	solucoes(Inv, -Termo::Inv, LInv),
-	testa(Termo),
+	testa(LInv),
 	retract(Termo).
 
 remover(Termo) :- retract(Termo).
