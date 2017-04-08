@@ -274,9 +274,9 @@ recorreu(IdUt, R) :-
 	unicos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado atos_medicos: IdUt, Instituicao, Servico, R -> {V,F}
+% Extensao do predicado atos_medicos: IdUt, Instituicao, Servico, IdPro, R -> {V,F}
 %
-% Identificar os atos medicos realizados por utente/instituicao/servico
+% Identificar os atos medicos realizados por utente/instituicao/servico/profissional
 %
 
 atos_medicos(IdUt, Inst, Serv, IdPro, R) :-
@@ -285,24 +285,24 @@ atos_medicos(IdUt, Inst, Serv, IdPro, R) :-
 		(
 			cuidado_prestado(IdServ, Serv, Inst, _),
 			ato_medico(Data, IdUt, IdServ, Custo, IdPro),
-			utente(IdUt, NomeU, _, _),
-		    profissional(IdPro, NomeP, _, _)
+		  utente(IdUt, NomeU, _, _),
+		  profissional(IdPro, NomeP, _, _)
 		),
 		R
 	).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado custo: IdUt,Serv,Inst,Data,R -> {V,F}
+% Extensao do predicado custo: IdUt,Serv,Inst,Data,IdPro,R -> {V,F}
 %
-% Calcular o custo dos atos medicos por utente/servico/instituicao/data
+% Calcular o custo dos atos medicos por utente/servico/instituicao/data/profissional
 %
 
-custo(IdUt, Serv, Inst, Data, R) :-
+custo(IdUt, Serv, Inst, Data, IdPro, R) :-
 	solucoes(
 		Custo,
 		(
 			cuidado_prestado(IdServ, Serv, Inst,_),
-			ato_medico(Data, IdUt, IdServ, Custo, _)
+			ato_medico(Data, IdUt, IdServ, Custo, IdPro)
 		),
 		S
 	),
@@ -310,19 +310,21 @@ custo(IdUt, Serv, Inst, Data, R) :-
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado
-% atos_medicos_interv: IdUt, Instituicao, Servico, DataIni, DataFim, R -> {V,F}
+% atos_medicos_interv: IdUt, Instituicao, Servico, IdPro, DataIni, DataFim, R -> {V,F}
 %
-% Identificar os atos medicos realizados por utente/instituicao/servico
+% Identificar os atos medicos realizados por utente/instituicao/servico/profissional
 % num intervalo de datas
 
-atos_medicos_interv(IdUt, Inst, Serv, Di, Df, R) :-
+atos_medicos_interv(IdUt, Inst, Serv, IdPro, Di, Df, R) :-
 	solucoes(
-		(Data, IdUt, Serv, Inst, Custo),
+		(Data, (IdUt, NomeU), Serv, Inst, Custo, (IdPro, NomeP)),
 		(
 			cuidado_prestado(IdServ, Serv, Inst, _),
 			ato_medico(Data, IdUt, IdServ, Custo, _),
 			nao(cmp_datas(Data, Di, <)),
-			nao(cmp_datas(Data, Df, >))
+		  nao(cmp_datas(Data, Df, >)),
+		  utente(IdUt, NomeU, _, _),
+		  profissional(IdPro, NomeP, _, _)
 		),
 		R
 	).
@@ -425,19 +427,19 @@ testa([I|T]) :- I, testa(T).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado profissional: IdPro, Nome, Idade, Morada -> {V,F}
 
-profissional( 1, 'Jose',      45, 'Rua ').
-profissional( 2, 'Manuel',    37, 'Avenida ').
-profissional( 3, 'Carlos',    62, 'Rua ').
-profissional( 4, 'Rodrigo',   53, 'Avenida ').
-profissional( 5, 'Eduarda',   49, 'Rua ').
-profissional( 6, 'Francisco', 33, 'Rua ').
-profissional( 7, 'Joao',      64, 'Avenida ').
-profissional( 8, 'Maria',     58, 'Rua ').
-profissional( 9, 'Carla',     47, 'Rua ').
-profissional(10, 'Andreia',   39, 'Rua ').
-profissional(11, 'Vitor',     56, 'Avenida ').
-profissional(12, 'Luisa',     60, 'Rua ').
-profissional(13, 'Ines',      53, 'Rua ').
+profissional( 1, 'Jose',      45, 'Rua Escura').
+profissional( 2, 'Manuel',    37, 'Avenida da Liberdade').
+profissional( 3, 'Carlos',    62, 'Rua Augusta').
+profissional( 4, 'Rodrigo',   53, 'Avenida Central').
+profissional( 5, 'Eduarda',   49, 'Rua de Santa Maria').
+profissional( 6, 'Francisco', 33, 'Rua dos Pescadores').
+profissional( 7, 'Joao',      64, 'Avenida Carvalho').
+profissional( 8, 'Maria',     58, 'Rua da Alegria').
+profissional( 9, 'Carla',     47, 'Rua das Flores').
+profissional(10, 'Andreia',   39, 'Rua do Saco').
+profissional(11, 'Vitor',     56, 'Avenida da Memoria').
+profissional(12, 'Luisa',     60, 'Rua da Tampa').
+profissional(13, 'Ines',      53, 'Rua da Pedra').
 
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
@@ -517,6 +519,12 @@ atribuido(13, 24).
 	solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
 	comprimento(L, N),
 	N == 1
+).
+
+% 
+
+-atribuicao(IdPro, IdServ) :: (
+    nao(ato_medico(_, _, IdServ, _, IdPro)
 ).
 
 
