@@ -680,7 +680,10 @@ demo( P $$ X, desconhecido ) :- nao( demo( P, verdadeiro ) ), demo( X, desconhec
 demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, falso ).
 demo( P $$ X, falso ) :- demo( P, falso ), demo( X, falso ).
 
-demo(
+demo( P <=> X, verdadeiro ) :- nao( demo( P, desconhecido ) ), demo( P, V ), demo( X, V ).
+demo( P <=> X, desconhecido ) :- demo( P, desconhecido ).
+demo( P <=> X, desconhecido ) :- demo( X, desconhecido ).
+demo( P <=> X, falso ) :- nao( demo( P, desconhecido ) ), nao( demo( X, desconhecido ) ), demo( P, V1 ), demo( X, V2 ), V1 \= V2.
 
 demo(t, verdadeiro).
 demo(f,falso).
