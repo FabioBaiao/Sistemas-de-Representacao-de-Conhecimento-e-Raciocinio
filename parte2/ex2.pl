@@ -13,9 +13,10 @@
 % SICStus PROLOG: definicoes iniciais
 
 :- op(900, xfy, '::').
-:- op( 900, xfy, '&&' ).  % operador de conjuncao
-:- op( 900, xfy, '$$' ).  % operador de disjuncao 
-:- op( 900, xfy, '=>' ).  % operador de implicacao 
+:- op( 1000, xfy, '&&' ).  % operador de conjuncao
+:- op( 1100, xfy, '$$' ).  % operador de disjuncao 
+:- op( 1200, xfx, '=>' ).  % operador de implicacao 
+:- op( 1200, xfx, '<=>' ).  % operador de equivalencia
 
 :- dynamic utente/4.
 :- dynamic cuidado_prestado/4.
@@ -678,6 +679,8 @@ demo( P $$ X, verdadeiro ) :- demo( X, verdadeiro ).
 demo( P $$ X, desconhecido ) :- nao( demo( P, verdadeiro ) ), demo( X, desconhecido ).
 demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, falso ).
 demo( P $$ X, falso ) :- demo( P, falso ), demo( X, falso ).
+
+demo(
 
 demo(t, verdadeiro).
 demo(f,falso).
