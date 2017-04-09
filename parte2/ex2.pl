@@ -707,8 +707,8 @@ demo( P, desconhecido ) :- nao( P ), nao( -P ).
 %demo novo
 demoN( P <=> X, V ) :- demoN( P, V1 ), demoN( X, V2 ), equivalencia( V1, V2, V ), !.
 demoN( P => X, V ) :- demoN( P, V1 ), demoN( X, V2 ), implicacao( V1, V2, V ), !.
-demoN( P $$ X, V ) :- demoN( P, V1 ), demoN( P, V2 ), disjuncao( V1, V2, V ), !.
-demoN( P && X, V ) :- demoN( P, V1 ), demoN( P, V2 ), conjuncao( V1, V2, V ), !.
+demoN( P $$ X, V ) :- demoN( P, V1 ), demoN( X, V2 ), disjuncao( V1, V2, V ), !.
+demoN( P && X, V ) :- demoN( P, V1 ), demoN( X, V2 ), conjuncao( V1, V2, V ), !.
 
 equivalencia( X, X, verdadeiro ) :- X \= desconhecido.
 equivalencia( desconhecido, Y, desconhecido ).
@@ -883,8 +883,10 @@ incerto(utente(IdUt)) :-
 % INVARIANTE ESTA BEM ???
 
 evolucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
-	solucoes(Inv, +utente(IdUt, Nome, Idade, Morada)::Inv, LInv),
-	testa(LInv),
+	solucoes(Inv, +utente(IdUt,Nome,Idade,Morada):-:Inv, LInv1),
+	solucoes(Inv, +utente(IdUt, Nome, Idade, Morada)::Inv, LInv2),
+	testa(LInv1),
+	testa(LInv2),
 	assert(nulo(Idade)),
 	assert((excecao(utente(Id,N,I,M)) :-
 	       utente(Id,N,Idade,M))),
