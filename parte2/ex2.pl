@@ -925,11 +925,6 @@ excecao(utente(Id, Nome, Idade, Morada)) :-
     utente(Id, Nome, Idade, nulo2).
 incertoMorada(utente(12, nulo2)).
 
-% Não se sabe a que serviços o profissional Jorge Simões (id = 14) está atribuído
-
-atribuido(14, nulo3).
-excecao(atribuido(IdUt, IdServ)) :-
-    atribuido(IdUt, nulo3).
 
 % Tipo II. Conhecimento Impreciso
 
@@ -942,8 +937,9 @@ excecao(utente(14, 'Alfredo', 74, 'Rua de Barros')).
 impreciso(utente(14)).
 impreciso(utente(14)).
 
-% O senhor Manuel lesionou-se a jogar futebol, mas não se sabe se lhe
-% foi diagnosticada um traumatismo craniano ou um ombro deslocado.
+% No dia 1 de Janeiro de 2017, o senhor Manuel lesionou-se a jogar futebol,
+% e nesse mesmo dia foi diagnosticado, mas não se sabe se lhe foi diagnosticado
+% um traumatismo craniano ou um ombro deslocado.
 
 excecao(diagnostico(2,2)).
 excecao(diagnostico(2,3)).
@@ -954,10 +950,10 @@ excecao(diagnostico(2,3)).
 % no hospital S. João no Porto, tendo esta custado 1200 euros, contudo
 % não se pode saber que o utente operado foi o senhor Fernando (id = 6)
 
-ato_medico(data(17,2,2017), nulo4, 28, 1200, 1).
+ato_medico(data(17,2,2017), nulo3, 28, 1200, 1).
 excecao(ato_medico(Data, IdUt, IdServ, Custo, IdPro)) :-
-    ato_medico(Data, nulo4, IdServ, Custo, IdPro).
-nulo(nulo4).
+    ato_medico(Data, nulo3, IdServ, Custo, IdPro).
+nulo(nulo3).
 +ato_medico(Data, IdUt, IdServ, Custo, IdPro) :: (
     solucoes(IdUtVar, (ato_medico(data(17,2,2017), IdUtVar, 28, 1200, 1), nao(nulo(IdUtVar))), S),
     comprimento(S,0)
@@ -965,10 +961,10 @@ nulo(nulo4).
 
 % Não se pode saber a idade do utente Renato Sancho, que mora na rua do Moinho.
 
-utente(15, 'Renato Sancho', nulo5, 'Rua do Moinho').
+utente(15, 'Renato Sancho', nulo4, 'Rua do Moinho').
 excecao(utente(Id, Nome, Idade, Morada)) :-
-    utente(Id, Nome, nulo5, Morada).
-nulo(nulo5).
+    utente(Id, Nome, nulo4, Morada).
+nulo(nulo4).
 +utente(Id, Nome, Idade, Morada) :: (
     solucoes(IdadeVar, (utente(15,'Renato Sancho', IdadeVar, 'Rua do Moinho'), nulo(IdadeVar)), L),
     comprimento(L,0)
