@@ -705,10 +705,10 @@ demo( P, falso ) :- -P.
 demo( P, desconhecido ) :- nao( P ), nao( -P ).
 
 %demo novo
-demoN( P <=> X, V ) :- demoN( P, V1 ), demoN( X, V2 ), equivalencia( V1, V2, V ).
-demoN( P => X, V ) :- demoN( P, V1 ), demoN( X, V2 ), implicacao( V1, V2, V ).
-demoN( P $$ X, V ) :- demoN( P, V1 ), demoN( P, V2 ), disjuncao( V1, V2, V ).
-demoN( P && X, V ) :- demoN( P, V1 ), demoN( P, V2 ), conjuncao( V1, V2, V ).
+demoN( P <=> X, V ) :- demoN( P, V1 ), demoN( X, V2 ), equivalencia( V1, V2, V ), !.
+demoN( P => X, V ) :- demoN( P, V1 ), demoN( X, V2 ), implicacao( V1, V2, V ), !.
+demoN( P $$ X, V ) :- demoN( P, V1 ), demoN( P, V2 ), disjuncao( V1, V2, V ), !.
+demoN( P && X, V ) :- demoN( P, V1 ), demoN( P, V2 ), conjuncao( V1, V2, V ), !.
 
 equivalencia( X, X, verdadeiro ) :- X \= desconhecido.
 equivalencia( desconhecido, Y, desconhecido ).
@@ -734,9 +734,8 @@ conjuncao( _, falso, falso ).
 conjuncao( desconhecido, verdadeiro, desconhecido ).
 conjuncao( verdadeiro, desconhecido, desconhecido ).
 
-demoN(t, verdadeiro).
-demoN(f,falso).
-
+v(A).
+-f(B).
 demoN( P , verdadeiro ) :- P.
 demoN( P, falso ) :- -P.
 demoN( P, desconhecido ) :- nao( P ), nao( -P ).
