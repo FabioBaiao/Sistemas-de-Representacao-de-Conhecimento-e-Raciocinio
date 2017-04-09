@@ -13,14 +13,18 @@
 % SICStus PROLOG: definicoes iniciais
 
 :- op(900, xfy, '::').
-:- op( 996, xfy, '&&' ).  % operador de conjuncao
-:- op( 997, xfy, '$$' ).  % operador de disjuncao 
-:- op( 998, xfx, '=>' ).  % operador de implicacao 
-:- op( 999, xfx, '<=>' ). % operador de equivalencia
+:- op(996, xfy, '&&' ).  % operador de conjuncao
+:- op(997, xfy, '$$' ).  % operador de disjuncao 
+:- op(998, xfx, '=>' ).  % operador de implicacao 
+:- op(999, xfx, '<=>' ). % operador de equivalencia
 
-:- op(900,xfy,:~:). % Invariante impreciso
-:- op(900,xfy,:-:). % Invariante incerto/interdito
+% Operador usado em invariantes avaliados apenas quando
+% se evolui/involui conhecimento imperfeito impreciso
+:- op(900,xfy,:~:).
 
+% Operador usado em invariantes avaliados apenas quando
+% se evolui/involui conhecimento imperfeito incerto/interdito
+:- op(900,xfy,:-:).
 
 :- dynamic utente/4.
 :- dynamic cuidado_prestado/4.
@@ -31,78 +35,62 @@
 :- dynamic '::'/2.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado utente: IdUt, Nome, Idade, Morada -> {V,F}
+% Extensao do predicado utente: IdUt, Nome, Idade, Morada -> {V,F,D}
 
-utente( 0, 'Jose',     55, 'Rua dos Zecas').
-utente( 1, 'Joao',     21, 'Rua de Baixo').
-utente( 2, 'Manuel',   36, 'Rua Maria Albertina').
-utente( 3, 'Carlos',   43, 'Rua da Fabrica').
-utente( 4, 'Maria',    73, 'Avenida Camoes').
-utente( 5, 'Joana',     8, 'Avenida Camoes').
-utente( 6, 'Fernando', 49, 'Rua da Beira').
-utente( 7, 'Joao',     29, 'Rua da Encosta').
-utente( 8, 'Ana',      40, 'Avenida Soares').
-utente( 9, 'Catarina', 17, 'Avenida Carneiro').
-utente(10, 'Maria',    33, 'Rua da Pata').
+% Para cada extensao do predicado utente, tem-se a respetiva
+% extensao do meta-predicado perfeito: Utente -> {V,F}
+% que assinala a existencia de conhecimento perfeito sobre
+% o utente inserido
 
-% PARTE II
-% Invariantes estruturais: nao permitir a insercao de conhecimento contraditorio
-% Com o invariante abaixo (que considera a negacao forte "geral") penso que este primeiro invariante
-%  é desnecessario
+utente(0, 'Jose', 55, 'Rua dos Zecas').
+perfeito(utente(0)).
 
-%+(-utente(IdUt, _, _, _)) :: (nao( utente(IdUt, _, _, _))).
+utente(1, 'Joao', 21, 'Rua de Baixo').
+perfeito(utente(1)).
 
-%			       solucoes(IdUt, utente(IdUt, _ ,_ , _), S),
-%			       comprimento(S, N),
-%			       N == 0).
+utente(2, 'Manuel', 36, 'Rua Maria Albertina').
+perfeito(utente(2)).
 
-% PARTE II
-% Invariante referencial: nao existe conhecimento negativo, nem positivo, nem excecoes
-%  o N == 1, serve para verificar que apenas existe o caso geral do negativo (que permite
-%   chegar à conclusao da primeira frase
+utente(3, 'Carlos', 43, 'Rua da Fabrica').
+perfeito(utente(3)).
 
-%+utente(IdUt, _, _, _) :: (
-%			    solucoes(IdUt, -utente(IdUt, _ ,_ , _), S),
-%			    comprimento(S, N),
-%			    N == 1).
+utente(4, 'Maria', 73, 'Avenida Camoes').
+perfeito(utente(4)).
 
+utente(5, 'Joana', 8, 'Avenida Camoes').
+perfeito(utente(5)).
 
-% PARTE II
-% Invariante estrutural: nao existe conhecimento negativo, nem positivo, nem excecoes
-%  N == 1, pois apenas pode haver o caso "geral"
+utente(6, 'Fernando', 49, 'Rua da Beira').
+perfeito(utente(6)).
 
-%+(-utente(IdUt, Nome, Idade, Morada)) :: (
-%			       solucoes(IdUt, -utente(IdUt, Nome, Idade, Morada), S),
-%			       comprimento(S, N),
-%			       N == 1).
+utente(7, 'Joao', 29, 'Rua da Encosta').
+perfeito(utente(7)).
 
-% Invariante estrutural: nao permitir a insercao de conhecimento
-%                        repetido
+utente(8, 'Ana', 40, 'Avenida Soares').
+perfeito(utente(8)).
 
-%+utente(IdUt, _, _, _) :: (
-%	solucoes(IdUt, utente(IdUt, _, _, _), S),
-%	comprimento(S, N),
-%	N == 1
-%).
+utente(9, 'Catarina', 17, 'Avenida Carneiro').
+perfeito(utente(9)).
 
-% Invariante: a idade de cada utente tem de ser inteira e
-%             estar no intervalo fechado [0,150]
+utente(10, 'Maria', 33, 'Rua da Pata').
+perfeito(utente(10)).
 
-%+utente(_, _, Idade, _) :: (
-%	integer(Idade),
-%	Idade >= 0, Idade =< 150
-%).
-			       
+utente(11, 'Joaquim', 56, 'Rua da Boavista').
+perfeito(utente(11)).
 
 % Invariante referencial: nao permitir que se remova um utente enquanto
 %                         existirem atos medicos associados a si
-
 -utente(IdUt, _, _, _) :: (
 	nao(ato_medico(_, IdUt, _, _, _))
 ).
 
+% Extensao do predicado que define a negacao forte do predicado utente
+-utente(IdUt, Nome, Idade, Morada) :-
+	nao(utente(IdUt, Nome, Idade, Morada)),
+	nao(excecao(utente(IdUt, Nome, Idade, Morada))).
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado cuidado_prestado: IdServ, Descricao, Instituicao, Cidade -> {V,F}
+% Extensao do predicado cuidado_prestado: IdServ, Descricao, Instituicao, Cidade -> {V,F,D}
 
 cuidado_prestado( 1, 'Cirurgia',     'Hospital Privado de Braga', 'Braga').
 cuidado_prestado( 2, 'Dermatologia', 'Hospital Privado de Braga', 'Braga').
@@ -146,42 +134,36 @@ cuidado_prestado(33, 'Pneumologia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(34, 'Radiografia',       'Hospital de S.Joao', 'Porto').
 cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
-% Invariante estrutural: nao permitir a insercao de conhecimento repetido
+% Extensao do predicado que define a negacao forte do predicado cuidado_prestado
+-cuidado_prestado(IdServ, Descricao, Instituicao, Cidade) :-
+	nao(cuidado_prestado(IdServ, Descricao, Instituicao, Cidade)),
+	nao(excecao(cuidado_prestado(IdServ, Descricao, Instituicao, Cidade))).
 
-%+cuidado_prestado(IdServ, _, _, _) :: (
-%	solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
-%	comprimento(S, N),
-%	N == 1
-%).
+% Ivariante estrutural: nao permitir a insercao de conhecimento contraditorio
 
-% PARTE II
-% Ivariantes estruturais: nao permitir a insercao de conhecimento contraditorio
-
+% Ao se inserir um cuidado prestado, tem de existir uma (e uma só) negação desse
+% cuidado prestado, correspondente à obtida pela formalização do PMF para os cuidados
+% prestados. Se essa negação existir, então não existe conhecimento perfeito positivo
+% nem execepções ao cuidado prestado a inserir, pelo que este pode ser inserido.
 +cuidado_prestado(IdServ, _, _, _) :: (
-					solucoes(IdServ, -cuidado_prestado(IdServ, _, _, _), S),
-					comprimento(S, N),
-					N == 1).
+	solucoes(IdServ, -cuidado_prestado(IdServ, _, _, _), S),
+	comprimento(S, N),
+	N == 1
+).
 
-%+(-cuidado_prestado(IdServ, _, _, _)) :: (nao(cuidados_prestado(IdServ, _, _, _))).
-
-%					  solucoes(IdServ, cuidado_prestado(IdServ, _, _, _), S),
-%					  comprimento(S, N),
-%					  N == 0).
-
-% PARTE II
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
- 
+
+% Antes de se inserir a negação explícita de um cuidado prestado, tem de existir
+% na base de conhecimento uma e uma só negação explícita desse cuidado prestado:
+% aquela que é obtida pela formalização do PMF.
 +(-cuidado_prestado(IdServ, Descr, Inst, Cidade)) :: (
-					  solucoes(IdServ, -cuidado_prestado(IdServ, Descr, Inst, Cidade), S),
-					  comprimento(S, N),
-					  N == 1).
-
-
-
+	solucoes(IdServ, -cuidado_prestado(IdServ, Descr, Inst, Cidade), S),
+	comprimento(S, N),
+	N == 1
+).
 
 % Invariante estrutural: nao permitir cuidados prestados com a mesma descricao,
 %                        na mesma instituicao e cidade
-
 +cuidado_prestado(_, Descr, Inst, Cidade) :: (
 	solucoes((Descr, Inst, Cidade), cuidado_prestado(_, Descr, Inst, Cidade), S),
 	comprimento(S, N),
@@ -190,7 +172,6 @@ cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 
 % Invariante referencial: nao permitir que se remova um cuidado prestado enquanto
 %                         existirem atos medicos a ele associados
-
 -cuidado_prestado(IdServ, _, _, _) :: (
 	nao(ato_medico(_, _, IdServ, _, _))
 ).
@@ -203,7 +184,7 @@ cuidado_prestado(35, 'Reumatologia',      'Hospital de S.Joao', 'Porto').
 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdPro -> {V,F}
+% Extensao do predicado ato_medico: Data, IdUt, IdServ, Custo, IdPro -> {V,F,D}
 
 ato_medico(data(03,03,2017),  3,  3, 30, 12).
 ato_medico(data(07,03,2017),  1, 20, 15,  5).
@@ -237,27 +218,12 @@ ato_medico(data(13,03,2017),  7, 22,  9,  9).
 +ato_medico(_, IdUt, IdServ, _, _) :: (
 	utente(IdUt, _, _, _),
 	cuidado_prestado(IdServ, _, _, _)
-).					
+).
 
-% Invariante: o primeiro argumento do ato_medico tem de ser o predicado data
-
-+ato_medico(X, _, _, _, _) :: (e_data(X)).
-
-% Invariante ???????: o custo dos atos medicos tem de ser um numero
-%                     nao negativo
-
-+ato_medico(_, _, _, Custo, _) :: (number(Custo), Custo >= 0).
-
-% Invariante referencial: nao permitir a insercao de atos medicos relativos a profissionais inexistentes
-
-+ato_medico(_, _, _, _, IdPro) :: (profissional(IdPro, _, _, _)).
-
-% Invariante referencial: nao permitir a insercao de atos medicos relativos a profissionais que nao estejam
-% atribuidos ao cuidado prestado.
-% Com este invariante, o invariante de cima torna-se desnecessario, ja que para um profissional estar atribuido a 
-% um cuidado, o profissional tem de existir
-
-+ato_medico(_, _, IdServ, _, IdPro) :: (atribuido(IdPro, IdServ)).
+% Extensao do predicado que define a negacao forte do predicado ato_medico
+-ato_medico(Data, IdUt, IdServ, Custo, IdPro) :-
+	nao(ato_medico(Data, IdUt, IdServ, Custo, IdPro)),
+	nao(excecao(ato_medico(Data, IdUt, IdServ, Custo, IdPro))).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado data: D, M, A -> {V,F}
@@ -278,11 +244,6 @@ data(D, 2, A) :-
 	A mod 4 =:= 0,
 	D >= 1,
 	D =< 29.
-
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado e_data: X -> {V,F}
-
-e_data(data(D, M, A)) :- data(D, M, A).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado selecionar_utentes: IdUt, Nome, Idade, Morada, R -> {V,F}
@@ -495,7 +456,7 @@ testa([]).
 testa([I|T]) :- I, testa(T).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado profissional: IdPro, Nome, Idade, Morada -> {V,F}
+% Extensao do predicado profissional: IdPro, Nome, Idade, Morada -> {V,F,D}
 
 profissional( 1, 'Jose',      45, 'Rua Escura').
 profissional( 2, 'Manuel',    37, 'Avenida da Liberdade').
@@ -510,36 +471,25 @@ profissional(10, 'Andreia',   39, 'Rua do Saco').
 profissional(11, 'Vitor',     56, 'Avenida da Memoria').
 profissional(12, 'Luisa',     60, 'Rua da Tampa').
 profissional(13, 'Ines',      53, 'Rua da Pedra').
-
-% Invariante estrutural: nao permitir a insercao de conhecimento repetido
-
-%+profissional(Id, _, _, _) :: (
-%	solucoes(Id, profissional(Id, _, _, _), S),
-%	comprimento(S, N),
-%	N == 1
-%			      ).
+profissional(14, 'Jorge Simoes', 28, 'Rua Ferreira de Castro').
 
 % PARTE II
 % Invariantes estruturais: nao permitir a insercao de conhecimento contraditorio
 
 +profissional(IdPro, _, _, _) :: (
-				   solucoes(IdPro, -profissional(IdPro, _, _, _), S),
-				   comprimento(S, N),
-				   N == 1).
-
-%+(-profissional(IdPro, _, _, _)) :: (nao(profissional(IdPro, _, _, _))).
-
-%				      solucoes(IdPro, profissional(IdPro, _, _, _), S),
-%				      comprimento(S, N),
-%				      N == 0).
+	solucoes(IdPro, -profissional(IdPro, _, _, _), S),
+	comprimento(S, N),
+	N == 1
+).
 
 % PARTE II
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
 +(-profissional(IdPro, Nome, Idade, Morada)) :: (
-                      solucoes(IdPro, -profissional(IdPro, Nome, Idade, Morada), S),
-                      comprimento(S, N),
-                      N == 1).
+	solucoes(IdPro, -profissional(IdPro, Nome, Idade, Morada), S),
+	comprimento(S, N),
+	N == 1
+).
 
 % Invariante referencial: nao permitir a remocao de profissionais se estiverem atribuidos a cuidados_prestados
 
@@ -553,8 +503,13 @@ profissional(13, 'Ines',      53, 'Rua da Pedra').
 	nao(ato_medico(_, _, _, _, Id))
 ).
 
+% Extensao do predicado que define a negacao forte do predicado profissional
+-profissional(IdPro, Nome, Idade, Morada) :-
+	nao(profissional(IdPro, Nome, Idade, Morada)),
+	nao(excecao(profissional(IdPro, Nome, Idade, Morada))).
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado atribuido: IdPro, IdServ -> {V,F}
+% Extensao do predicado atribuido: IdPro, IdServ -> {V,F,D}
 
 atribuido( 1, 15).
 atribuido( 1, 28).
@@ -596,53 +551,34 @@ atribuido(12, 35).
 atribuido(13, 30).
 atribuido(13, 24).
 
-
-% Invariante referencial: nao permitir a insercao de atribuicoes relativas
-%                         a profissionais e/ou cuidados prestados inexistentes
-
-+atribuido(IdPro, IdServ) :: (
-	profissional(IdPro, _, _, _),
-	cuidado_prestado(IdServ, _, _, _)
-).
-
-% PARTE II
 % Invariantes estruturais: nao permitir a insercao de conhecimento 
 %                          contraditorio
 
 +atribuido(IdPro, IdServ) :: (
-			       solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
-			       comprimento(S, N),
-			       N == 1).
-
-%+(-atribuido(IdPro, IdServ)) :: (nao(atribuido(IdPro, IdServ))).
-
-%				  solucoes((IdPro,IdServ), atribuido(IdPro, IdServ), S),
-%				  comprimento(S, N),
-%				  N == 0).
-
-% PARTE II
-% Invariante estrutural: nao permitir a insercao de conhecimento 
-%                        repetido
-
-+(-atribuido(IdPro, IdServ)) :: (
-                      solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
-                      comprimento(S, N),
-                      N == 1).
-
+	solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
+	comprimento(S, N),
+	N == 1
+).
 
 % Invariante estrutural: nao permitir a insercao de conhecimento repetido
 
-%+atribuido(IdPro, IdServ) :: (
-%	solucoes((IdPro, IdServ), atribuido(IdPro, IdServ), L),
-%	comprimento(L, N),
-%	N == 1
-%).
++(-atribuido(IdPro, IdServ)) :: (
+	solucoes((IdPro,IdServ), -atribuido(IdPro, IdServ), S),
+	comprimento(S, N),
+	N == 1
+).
 
 % Invariante referencial: nao permitir a remocao de atribuicoes se exisitrem atos medicos 
 %                         que "dependam" dessa atribuicao
 
 -atribuido(IdPro, IdServ) :: (
-			       nao(ato_medico(_, _, IdServ, _, IdPro))).
+	nao(ato_medico(_, _, IdServ, _, IdPro))
+).
+
+% Extensao do predicado que define a negacao forte do predicado atribuido
+-atribuido(IdPro, IdServ) :-
+	nao(atribuido(IdPro, IdServ)),
+	nao(excecao(atribuido(IdPro, IdServ))).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado profissionais: Inst, Serv, R -> {V,F}
@@ -672,7 +608,7 @@ selecionar_profissionais(IdPro, Nome, Idade, Morada, R) :-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-% Extensao do meta-predicado demo :: Conjunção, Resposta -> {V,F}
+% Extensao do meta-predicado demo :: Expressão, Resposta -> {V,F}
 demo( P <=> X, V ) :- demo( P, V1 ), demo( X, V2 ), equivalencia( V1, V2, V ), !.
 demo( P => X, V ) :- demo( P, V1 ), demo( X, V2 ), implicacao( V1, V2, V ), !.
 demo( P $$ X, V ) :- demo( P, V1 ), demo( X, V2 ), disjuncao( V1, V2, V ), !.
@@ -707,21 +643,39 @@ demo( P, falso ) :- -P.
 demo( P, desconhecido ) :- nao( P ), nao( -P ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado doenca :: IdDoenca, Designacao, Descricao -> {V,F,D}
-doenca( 1, 'SIDA', 'Uma camisinha nunca fez mal a ninguém' ).
+% Extensao do predicado doenca :: IdDoenca, Designacao, Descricao -> {V,F}
+doenca(1, 'SIDA', 'Uma camisinha nunca fez mal a ninguém' ).
+doenca(2, 'Traumatismo Craniano', 'Lesão na cabeça').
+doenca(3, 'Ombro Deslocado', 'Deslocamento da articulação do ombro').
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado diagnostico :: IdUtente, IdDoenca -> {V,F,D}
-diagnostico( 2, 1 ).
+% Extensao do predicado diagnostico: Data, IdUtente, IdDoenca -> {V,F,D}
 
-% Extensao do predicado que define a negacao forte do predicado utente
+diagnostico(data(1,1,2017), 2, 1).
 
--utente(IdUt, Nome, Idade, Morada) :-
-	nao(utente(IdUt, Nome, Idade, Morada)),
-	nao(excecao(utente(IdUt, Nome, Idade, Morada))).
+% Invariantes estruturais: impede conhecimento contraditório relativo aos diagnosticos
++diagnostico(_, IdUt, IdDoenca) :: (
+	solucoes((IdUt,IdDoenca), -diagnostico(_, IdUt, IdDoenca), S),
+	comprimento(S, N),
+	N == 1
+).
+
++(-diagnostico(_, IdUt, IdDoenca)) :: (
+	solucoes((IdUt,IdDoenca), -diagnositico(_, IdUt, IdDoenca), S),
+	comprimento(S, N),
+	N == 1
+).
+
+% Extensão do predicado que define a negação forte do predicado diagnostico
+-diagnostico(Data, IdUt, IdDoenca) :-
+	nao(diagnostico(Data, IdUt, IdDoenca)),
+	nao(excecao(diagnostico(Data, IdUt, IdDoenca))).
 
 % ----------------------------------------------------------------------------
 % ----------------------------------------------------------------------------
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado evolucaoPerfeito: ConhecimentoPerfeito -> {V,F}
 
 % Evolucao de conhecimento perfeito que remove conhecimento impreciso/incerto
 
@@ -740,9 +694,8 @@ evolucaoPerfeito((-utente(IdUt, Nome, Idade, Morada))) :-
 	assert(perfeito(utente(IdUt))).
 
 
-% Remocao de conhecimento impreciso (nao é involucao!!)
-% É procedimental, tal como o solucoes, etc
-
+% Remocao de conhecimento impreciso (nao é involucao!)
+% É procedimental, tal como os predicados de evolucao, solucoes, etc.
 removerImpreciso(utente(IdUt, Nome, Idade, Morada)) :-
 	retract(excecao(utente(IdUt,_,_,_))),
 	removerImpreciso(utente(IdUt,Nome,Idade,Morada)).
@@ -756,7 +709,6 @@ removerImpreciso(utente(IdUt, Nome, Idade, Morada)) :-
 
 
 % Remocao de conhecimento incerto (nao é involucao!!)
-% É procedimental...
 
 removerIncerto(utente(IdUt,Nome,Idade,Morada)) :-
 	incertoIdade(utente(IdUt,I)),
@@ -765,24 +717,28 @@ removerIncerto(utente(IdUt,Nome,Idade,Morada)) :-
 	retract(utente(IdUt, _, _ ,_)),
 	retract(incertoIdade(utente(IdUt, _))).
 
-% Para remover conhecimento incerto sobre outro argumento é necessário criar um predicado identido ao de cima
-
-
 removerIncerto(utente(IdUt,Nome,Idade,Morada)).
 
+% Para se remover conhecimento incerto sobre outro argumento
+% basta criar uma extensao do predicado removerIncerto
+% análoga à apresentada
 
-% Invariante que nao permite inserir conhecimento perfeito se ja existir conhecimento perfeito
-% É necessario distinguir o operador
+
+% Invariantes que nao permitem inserir conhecimento perfeito
+% se ja existir conhecimento perfeito
 
 +utente(IdUt, Nome, Idade, Morada) :: (
-					nao(perfeito(utente(IdUt)))
-				      ).
+	nao(perfeito(utente(IdUt)))
+).
 
 +(-utente(IdUt, Nome, Idade, Morada)) :: (
-					  nao(perfeito(utente(IdUt)))
-					).
+	nao(perfeito(utente(IdUt)))
+).
 
 % Evolucao de conhecimento impreciso que remove conhecimento incerto
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado evolucaoImpreciso: EnumeracaoFactosAnomalos -> {V,F}
 
 evolucaoImpreciso([utente(IdUt, Nome, Idade, Morada)|T]) :-
 	T \= [],
@@ -811,16 +767,15 @@ insereExcecoes([utente(IdUt, Nome, Idade, Morada)|Es]) :-
 	insereExcecoes(Es).
 
 
-% Invariante que nao permite inserir conhecimento impreciso se ja existir conhecimento perfeito ou impreciso
-% DISTINGUI OPERADOR
+% Invariante que nao permite inserir conhecimento impreciso se
+% ja existir conhecimento perfeito ou impreciso
 
 +utente(IdUt, Nome, Idade, Morada) :~: (
-					nao(perfeito(utente(IdUt))),
-					nao(impreciso(utente(IdUt)))
-				      ).
+	nao(perfeito(utente(IdUt))),
+	nao(impreciso(utente(IdUt)))
+).
 
-
-% Evolucao de conhecimento incerto sobre a idade 
+% Evolucao de conhecimento incerto sobre a idade
 
 evolucaoIncertoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 	solucoes(Inv, +utente(IdUt,Nome,Idade,Morada):-:Inv, LInv1),
@@ -833,20 +788,20 @@ evolucaoIncertoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 	assert(incertoIdade(utente(IdUt,Idade))).
 
 
-% Invariante que nao permitr inserir conhecimento incerto/interdito se ja exisitr conhecimento
-% DISTINGUIR OPERADOR
-
+% Invariante que nao permite a insercao de conhecimento
+% incerto/interdito se ja exisitir conhecimento.
 +utente(IdUt, Nome, Idade, Morada) :-: (
-					nao(perfeito(utente(IdUt))),
-					nao(impreciso(utente(IdUt))),
-					nao(incerto(utente(IdUt)))
-				      ).
+	nao(perfeito(utente(IdUt))),
+	nao(impreciso(utente(IdUt))),
+	nao(incerto(utente(IdUt)))
+).
 
 incerto(utente(IdUt)) :-
 	incertoIdade(utente(IdUt, _)).
+incerto(utente(IdUt)) :-
+	incertoMorada(utente(IdUt, _)).
 
 % Evolucao de conhecimento interdito sobre a idade
-% INVARIANTE ESTA BEM ???
 
 evolucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 	solucoes(Inv, +utente(IdUt,Nome,Idade,Morada):-:Inv, LInv1),
@@ -862,7 +817,8 @@ evolucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 				     ))),
 	assert(utente(IdUt, Nome,Idade,Morada)).
 
-
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado involucaoPerfeito: ConhecimentoAremover -> {V,F}
 
 involucaoPerfeito(utente(IdUt, Nome, Idade, Morada)) :-
 	utente(IdUt, Nome, Idade, Morada),
@@ -878,6 +834,7 @@ involucaoPerfeito((-utente(IdUt, Nome, Idade, Morada))) :-
 	retract(utente(IdUt, Nome, Idade, Morada)),
 	retract(perfeito(utente(IdUt))).
 
+% Involução do conhecimento incerto relativo à idade de um utente
 involucaoIncertoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 	utente(IdUt, Nome,Idade,Morada),
 	incertoIdade(utente(IdUt, I)),
@@ -888,29 +845,35 @@ involucaoIncertoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 	retract(utente(IdUt, _, _ ,_)),
 	retract(incertoIdade(utente(IdUt, _))).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado involucaoImpreciso: EnumeracaoFactosAnomalos -> {V,F}
 involucaoImpreciso([utente(Id,Nome,Idade,Morada) | T]) :-
     procuraPor([utente(Id,Nome,Idade,Morada) | T]),
     mesmoUtente(T, Id),
     testaInvolInvs([utente(Id,Nome,Idade,Morada) | T]),
     removeExcecoes([utente(Id,Nome,Idade,Morada) | T]).
 
+% Remove a excecao a cada um dos predicados de uma lista de predicados
 removeExcecoes([]).
 removeExcecoes([utente(IdUt,Nome,Idade,Morada)|Ps]) :-
 	retract(excecao(utente(IdUt, Nome, Idade, Morada))),
 	retract(impreciso(utente(IdUt))),
 	removeExcecoes(Ps).
 
+% Procura por uma excecao para cada um dos termos de uma lista de termos
 procuraPor([]).
 procuraPor([T|Ts]) :-
     excecao(T), procuraPor(Ts).
 
+% Testa os invariantes de remoçã de uma lista para cada um
+% dos elementos de uma lista de predicados
 testaInvolInvs([]).
 testaInvolInvs([P|Ps]) :- 
     solucoes(Inv, -P::Inv, LInv),
     testa(LInv),
     testaInvolInvs(Ps).
 
-
+% Involucao do conhecimento interdito relativo a idade de um utente
 involucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 	utente(IdUt, Nome, Idade, Morada),
 	nulo(Idade),
@@ -924,3 +887,89 @@ involucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 				       comprimento(S,0)
 				     ))),
 	retract(utente(IdUt, Nome,Idade,Morada)).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Conhecimento perfeito negativo
+
+% Não existe um utente com o Id 100, chamado Bernardino,
+% que tenha 29 anos e more na rua do pinheiro.
+-utente(100, 'Bernardino', 29, 'Rua do Pinheiro').
+perfeito(utente(100)).
+
+% Não existe um serviço de pneumologia com o id 34, no
+% centro de saude de Gualtar, em Braga.
+-cuidado_prestado(34, 'Pneumologia', 'Centro de Saude de Gualtar', 'Braga').
+
+% No dia 9 de Janeiro de 2017, não foi realizado qualquer ato médico
+% ao utente com o id 1, no serviço 3, que tenha tido um custo de
+% 75 unidades monetárias e o profissional 2 como responsável.
+-ato_medico(data(9,1,2017), 1, 3, 75, 2).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Representação de conhecimento imperfeito
+
+% Tipo I. Conhecimento Incerto
+
+% No dia 4 de Abril de 2017, o senhor Joaquim foi a uma
+% consulta de cardiologia no “Hospital de Braga” e sabe-se que esta teve
+% um custo de 50 euros, mas não se sabe quem foi o profissional responsável.
+
+ato_medico(data(4,4,2017), 11, 6, 50, nulo1).
+excecao(ato_medico(Data, IdUt, IdServ, Custo, IdPro)) :-
+    ato_medico(Data, IdUt, IdServ, Custo, nulo1).
+
+% A utente Maria de Lurdes tem 68 anos, mas desconhece-se a sua morada.
+
+utente(12, 'Maria de Lurdes', 68, nulo2).
+excecao(utente(Id, Nome, Idade, Morada)) :-
+    utente(Id, Nome, Idade, nulo2).
+incertoMorada(utente(12, nulo2)).
+
+% Não se sabe a que serviços o profissional Jorge Simões (id = 14) está atribuído
+
+atribuido(14, nulo3).
+excecao(atribuido(IdUt, IdServ)) :-
+    atribuido(IdUt, nulo3).
+
+% Tipo II. Conhecimento Impreciso
+
+% O senhor Alfredo tem 74 anos e devido aos seus problemas na fala,
+% aquando do seu registo como utente, não deu para perceber se mora
+% na "rua de Barros" ou na "rua de Baixo".
+
+excecao(utente(14, 'Alfredo', 74, 'Rua de Baixo')).
+excecao(utente(14, 'Alfredo', 74, 'Rua de Barros')).
+impreciso(utente(14)).
+impreciso(utente(14)).
+
+% O senhor Manuel lesionou-se a jogar futebol, mas não se sabe se lhe
+% foi diagnosticada um traumatismo craniano ou um ombro deslocado.
+
+excecao(diagnostico(2,2)).
+excecao(diagnostico(2,3)).
+
+% Tipo III. Conhecimento Interdito
+
+% No dia 17 de Fevereiro de 2017, o doutor José (id = 1) realizou uma cirurgia
+% no hospital S. João no Porto, tendo esta custado 1200 euros, contudo
+% não se pode saber que o utente operado foi o senhor Fernando (id = 6)
+
+ato_medico(data(17,2,2017), nulo4, 28, 1200, 1).
+excecao(ato_medico(Data, IdUt, IdServ, Custo, IdPro)) :-
+    ato_medico(Data, nulo4, IdServ, Custo, IdPro).
+nulo(nulo4).
++ato_medico(Data, IdUt, IdServ, Custo, IdPro) :: (
+    solucoes(IdUtVar, (ato_medico(data(17,2,2017), IdUtVar, 28, 1200, 1), nao(nulo(IdUtVar))), S),
+    comprimento(S,0)
+).
+
+% Não se pode saber a idade do utente Renato Sancho, que mora na rua do Moinho.
+
+utente(15, 'Renato Sancho', nulo5, 'Rua do Moinho').
+excecao(utente(Id, Nome, Idade, Morada)) :-
+    utente(Id, Nome, nulo5, Morada).
+nulo(nulo5).
++utente(Id, Nome, Idade, Morada) :: (
+    solucoes(IdadeVar, (utente(15,'Renato Sancho', IdadeVar, 'Rua do Moinho'), nulo(IdadeVar)), L),
+    comprimento(L,0)
+).
