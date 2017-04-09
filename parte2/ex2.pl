@@ -13,10 +13,14 @@
 % SICStus PROLOG: definicoes iniciais
 
 :- op(900, xfy, '::').
-:- op( 1000, xfy, '&&' ).  % operador de conjuncao
-:- op( 1100, xfy, '$$' ).  % operador de disjuncao 
-:- op( 1200, xfx, '=>' ).  % operador de implicacao 
-:- op( 1200, xfx, '<=>' ).  % operador de equivalencia
+:- op( 996, xfy, '&&' ).  % operador de conjuncao
+:- op( 997, xfy, '$$' ).  % operador de disjuncao 
+:- op( 998, xfx, '=>' ).  % operador de implicacao 
+:- op( 999, xfx, '<=>' ). % operador de equivalencia
+
+:- op(900,xfy,:~:). % Invariante impreciso
+:- op(900,xfy,:-:). % Invariante incerto/interdito
+
 
 :- dynamic utente/4.
 :- dynamic cuidado_prestado/4.
@@ -24,6 +28,7 @@
 :- dynamic atribuido/2.
 :- dynamic ato_medico/5.
 :- dynamic '-'/1.
+:- dynamic '::'/2.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado utente: IdUt, Nome, Idade, Morada -> {V,F}
@@ -56,20 +61,20 @@ utente(10, 'Maria',    33, 'Rua da Pata').
 %  o N == 1, serve para verificar que apenas existe o caso geral do negativo (que permite
 %   chegar à conclusao da primeira frase
 
-+utente(IdUt, _, _, _) :: (
-			    solucoes(IdUt, -utente(IdUt, _ ,_ , _), S),
-			    comprimento(S, N),
-			    N == 1).
+%+utente(IdUt, _, _, _) :: (
+%			    solucoes(IdUt, -utente(IdUt, _ ,_ , _), S),
+%			    comprimento(S, N),
+%			    N == 1).
 
 
 % PARTE II
 % Invariante estrutural: nao existe conhecimento negativo, nem positivo, nem excecoes
 %  N == 1, pois apenas pode haver o caso "geral"
 
-+(-utente(IdUt, Nome, Idade, Morada)) :: (
-			       solucoes(IdUt, -utente(IdUt, Nome, Idade, Morada), S),
-			       comprimento(S, N),
-			       N == 1).
+%+(-utente(IdUt, Nome, Idade, Morada)) :: (
+%			       solucoes(IdUt, -utente(IdUt, Nome, Idade, Morada), S),
+%			       comprimento(S, N),
+%			       N == 1).
 
 % Invariante estrutural: nao permitir a insercao de conhecimento
 %                        repetido
@@ -706,3 +711,137 @@ diagnostico( 2, 1 ).
 -utente(IdUt, Nome, Idade, Morada) :-
 	nao(utente(IdUt, Nome, Idade, Morada)),
 	nao(excecao(utente(IdUt, Nome, Idade, Morada))).
+
+% ----------------------------------------------------------------------------
+% ----------------------------------------------------------------------------
+
+% Evolucao de conhecimento perfeito que remove conhecimento impreciso/incerto
+
+evolucaoPerfeito(utente(IdUt,Nome,Idade,Morada)) :-
+	solucoes(Inv, +utente(IdUt,Nome,Idade,Morada)::Inv, LInv),
+	testa(LInv),
+	removerImpreciso(utente(IdUt,Nome,Idade,Morada)),
+	assert(utente(IdUt,Nome,Idade,Morada)),
+	assert(perfeito(utente(IdUt))).
+
+
+% Remocao de conhecimento impreciso (nao é involucao!!)
+% É procedimental, tal como o solucoes, etc
+
+removerImpreciso(utente(IdUt, Nome, Idade, Morada)) :-
+	retract(excecao(utente(IdUt,_,_,_))),
+	removerImpreciso(utente(IdUt,Nome,Idade,Morada)).
+
+removerImpreciso(utente(IdUt,Nome,Idade,Morada)) :-
+	retract(impreciso(utente(IdUt))),
+	removerImpreciso(utente(IdUT,Nome,Idade,Morada)).
+
+removerImpreciso(utente(IdUt, Nome, Idade, Morada)) :-
+	removerIncerto(utente(IdUt,Nome,Idade,Morada)).
+
+
+% Remocao de conhecimento incerto (nao é involucao!!)
+% É procedimental...
+
+removerIncerto(utente(IdUt,Nome,Idade,Morada)) :-
+	incertoIdade(utente(IdUt,I)),
+	retract((excecao(utente(Id,N,Ida,M)) :-
+		utente(Id,N,I,M))),
+	retract(utente(IdUt, _, _ ,_)),
+	retract(incertoIdade(utente(IdUt, _))).
+
+% Para remover conhecimento incerto sobre outro argumento é necessário criar um predicado identido ao de cima
+
+
+removerIncerto(utente(IdUt,Nome,Idade,Morada)).
+
+
+% Invariante que nao permite inserir conhecimento perfeito se ja existir conhecimento perfeito
+% É necessario distinguir o operador
+
++utente(IdUt, Nome, Idade, Morada) :: (
+					nao(perfeito(utente(IdUt)))
+				      ).
+
++(-utente(IdUt, Nome, Idade, Morada)) :: (
+					  nao(perfeito(utente(IdUt)))
+					).
+
+% Evolucao de conhecimento impreciso que remove conhecimento incerto
+
+evolucaoImpreciso([utente(IdUt, Nome, Idade, Morada)|T]) :-
+	T \= [],
+	mesmoUtente(T, IdUt),
+	testaInvs([utente(IdUt, Nome, Idade, Morada)|T]),
+	removerIncerto(utente(IdUt, Nome, Idade, Morada)),
+	insereExcecoes([utente(IdUt, Nome, Idade, Morada)|T]),
+	assert(impreciso(utente(IdUt))).
+
+mesmoUtente([], _).
+mesmoUtente([utente(Id1, _, _, _) | T], Id2) :-
+	Id1 == Id2,
+	mesmoUtente(T, Id2).
+
+testaInvs([]).
+testaInvs([P|Ps]) :-
+	solucoes(Inv, +P::Inv, LInv1),
+	solucoes(Inv, +P:~:Inv, LInv2),
+	testa(LInv1),	 
+	testa(LInv2),
+	testaInvs(Ps).
+
+insereExcecoes([]).
+insereExcecoes([E|Es]) :-
+	evolucao(excecao(E)), % assert ??
+	insereExcecoes(Es).
+
+
+% Invariante que nao permite inserir conhecimento impreciso se ja existir conhecimento perfeito ou impreciso
+% DISTINGUI OPERADOR
+
++utente(IdUt, Nome, Idade, Morada) :~: (
+					nao(perfeito(utente(IdUt))),
+					nao(impreciso(utente(IdUt)))
+				      ).
+
+
+% Evolucao de conhecimento incerto sobre a idade 
+
+evolucaoIncertoIdade(utente(IdUt, Nome, Idade, Morada)) :-
+	solucoes(Inv, +utente(IdUt,Nome,Idade,Morada):-:Inv, LInv1),
+	solucoes(Inv, +utente(IdUt, Nome, Idade, Morada)::Inv, LInv2),
+	testa(LInv1),
+	testa(LInv2),
+	assert((excecao(utente(Id,N,I,M)) :-
+	       utente(Id,N,Idade,M))),
+	assert(utente(IdUt, Nome, Idade, Morada)),
+	assert(incertoIdade(utente(IdUt,Idade))).
+
+
+% Invariante que nao permitr inserir conhecimento incerto/interdito se ja exisitr conhecimento
+% DISTINGUIR OPERADOR
+
++utente(IdUt, Nome, Idade, Morada) :-: (
+					nao(perfeito(utente(IdUt))),
+					nao(impreciso(utente(IdUt))),
+					nao(incerto(utente(IdUt)))
+				      ).
+
+incerto(utente(IdUt)) :-
+	incertoIdade(utente(IdUt, _)).
+
+% Evolucao de conhecimento interdito sobre a idade
+% INVARIANTE ESTA BEM ???
+
+evolucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
+	solucoes(Inv, +utente(IdUt, Nome, Idade, Morada)::Inv, LInv),
+	testa(LInv),
+	assert(nulo(Idade)),
+	assert((excecao(utente(Id,N,I,M)) :-
+	       utente(Id,N,Idade,M))),
+	assert((+utente(Id,N,I,M) :: (
+				       solucoes(Id,(utente(Id,_,Idade,_), nulo(Idade)),S),
+				       comprimento(S,0)
+				     ))),
+	assert(utente(IdUt, Nome,Idade,Morada)).
+
