@@ -690,6 +690,14 @@ demo( P <=> X, desconhecido ) :- demo( P, desconhecido ).
 demo( P <=> X, desconhecido ) :- demo( X, desconhecido ).
 demo( P <=> X, falso ) :- nao( demo( P, desconhecido ) ), nao( demo( X, desconhecido ) ), demo( P, V1 ), demo( X, V2 ), V1 \= V2.
 
+demo( P => X, verdadeiro ) :- demo( P, falso ).
+demo( P => X, verdadeiro ) :- demo( P, desconhecido ), demo( X, verdadeiro ).
+demo( P => X, verdadeiro ) :- demo( P, verdadeiro), demo( X, verdadeiro ).
+demo( P => X, desconhecido ) :- demo( P, verdadeiro ), demo( X, desconhecido ).
+demo( P => X, desconhecido ) :- demo( P, desconhecido ), nao( demo( X, verdadeiro) ).
+demo( P => X, falso ) :- demo( P, verdadeiro ), demo( X, falso ).
+
+
 demo(t, verdadeiro).
 demo(f,falso).
 
