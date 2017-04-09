@@ -766,6 +766,13 @@ evolucaoPerfeito(utente(IdUt,Nome,Idade,Morada)) :-
 	assert(utente(IdUt,Nome,Idade,Morada)),
 	assert(perfeito(utente(IdUt))).
 
+evolucaoPerfeito((-utente(IdUt, Nome, Idade, Morada))) :-
+	solucoes(Inv, +(-utente(IdUt,Nome,Idade,Morada))::Inv, LInv),
+	testa(LInv),
+	removerImpreciso(utente(IdUt,Nome,Idade,Morada)),
+	assert((-utente(IdUt,Nome,Idade,Morada))),
+	assert(perfeito(utente(IdUt))).
+
 
 % Remocao de conhecimento impreciso (nao é involucao!!)
 % É procedimental, tal como o solucoes, etc
@@ -816,8 +823,7 @@ evolucaoImpreciso([utente(IdUt, Nome, Idade, Morada)|T]) :-
 	mesmoUtente(T, IdUt),
 	testaInvs([utente(IdUt, Nome, Idade, Morada)|T]),
 	removerIncerto(utente(IdUt, Nome, Idade, Morada)),
-	insereExcecoes([utente(IdUt, Nome, Idade, Morada)|T]),
-	assert(impreciso(utente(IdUt))).
+	insereExcecoes([utente(IdUt, Nome, Idade, Morada)|T]).
 
 mesmoUtente([], _).
 mesmoUtente([utente(Id1, _, _, _) | T], Id2) :-
@@ -833,8 +839,9 @@ testaInvs([P|Ps]) :-
 	testaInvs(Ps).
 
 insereExcecoes([]).
-insereExcecoes([E|Es]) :-
-	evolucao(excecao(E)), % assert ??
+insereExcecoes([utente(IdUt, Nome, Idade, Morada)|Es]) :-
+	assert(excecao(utente(IdUt, Nome, Idade, Morada))),	
+	assert(impreciso(utente(IdUt))),
 	insereExcecoes(Es).
 
 
@@ -887,3 +894,65 @@ evolucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
 				     ))),
 	assert(utente(IdUt, Nome,Idade,Morada)).
 
+
+
+involucaoPerfeito(utente(IdUt, Nome, Idade, Morada)) :-
+	utente(IdUt, Nome, Idade, Morada),
+	solucoes(Inv, -utente(IdUt,Nome,Idade,Morada)::Inv, LInv),
+	testa(LInv),
+	retract(utente(IdUt, Nome, Idade, Morada)),
+	retract(perfeito(utente(IdUt))).
+
+involucaoPerfeito((-utente(IdUt, Nome, Idade, Morada))) :-
+	utente(IdUt, Nome, Idade, Morada),
+	solucoes(Inv, -(-utente(IdUt,Nome,Idade,Morada))::Inv, LInv),
+	testa(LInv),
+	retract(utente(IdUt, Nome, Idade, Morada)),
+	retract(perfeito(utente(IdUt))).
+
+involucaoIncertoIdade(utente(IdUt, Nome, Idade, Morada)) :-
+	utente(IdUt, Nome,Idade,Morada),
+	incertoIdade(utente(IdUt, I)),
+	solucoes(Inv, -utente(IdUt, Nome, Idade, Morada)::Inv, LInv),
+	testa(LInv),
+	retract((excecao(utente(Id,N,Ida,M)) :-
+		utente(Id,N,I,M))),
+	retract(utente(IdUt, _, _ ,_)),
+	retract(incertoIdade(utente(IdUt, _))).
+
+involucaoImpreciso([utente(Id,Nome,Idade,Morada) | T]) :-
+    procuraPor([utente(Id,Nome,Idade,Morada) | T]),
+    mesmoUtente(T, Id),
+    testaInvolInvs([utente(Id,Nome,Idade,Morada) | T]),
+    removeExcecoes([utente(Id,Nome,Idade,Morada) | T]).
+
+removeExcecoes([]).
+removeExcecoes([utente(IdUt,Nome,Idade,Morada)|Ps]) :-
+	retract(excecao(utente(IdUt, Nome, Idade, Morada))),
+	retract(impreciso(utente(IdUt))),
+	removeExcecoes(Ps).
+
+procuraPor([]).
+procuraPor([T|Ts]) :-
+    excecao(T), procuraPor(Ts).
+
+testaInvolInvs([]).
+testaInvolInvs([P|Ps]) :- 
+    solucoes(Inv, -P::Inv, LInv),
+    testa(LInv),
+    testaInvolInvs(Ps).
+
+
+involucaoInterditoIdade(utente(IdUt, Nome, Idade, Morada)) :-
+	utente(IdUt, Nome, Idade, Morada),
+	nulo(Idade),
+	solucoes(Inv, -utente(IdUt, Nome, Idade, Morada)::Inv, LInv),
+	testa(LInv),
+	retract(nulo(Idade)),
+	retract((excecao(utente(Id,N,I,M)) :-
+	       utente(Id,N,Idade,M))),
+	retract((+utente(Id,N,I,M) :: (
+				       solucoes(Id,(utente(Id,_,Idade,_), nulo(Idade)),S),
+				       comprimento(S,0)
+				     ))),
+	retract(utente(IdUt, Nome,Idade,Morada)).
