@@ -673,42 +673,10 @@ selecionar_profissionais(IdPro, Nome, Idade, Morada, R) :-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 % Extensao do meta-predicado demo :: Conjunção, Resposta -> {V,F}
-demo( P <=> X, verdadeiro ) :- nao( demo( P, desconhecido ) ), demo( P, V ), demo( X, V ).
-demo( P <=> X, desconhecido ) :- demo( P, desconhecido ).
-demo( P <=> X, desconhecido ) :- demo( X, desconhecido ).
-demo( P <=> X, falso ) :- nao( demo( P, desconhecido ) ), nao( demo( X, desconhecido ) ), demo( P, V1 ), demo( X, V2 ), V1 \= V2.
-
-demo( P => X, verdadeiro ) :- demo( P, falso ).
-demo( P => X, verdadeiro ) :- demo( P, desconhecido ), demo( X, verdadeiro ).
-demo( P => X, verdadeiro ) :- demo( P, verdadeiro), demo( X, verdadeiro ).
-demo( P => X, desconhecido ) :- demo( P, verdadeiro ), demo( X, desconhecido ).
-demo( P => X, desconhecido ) :- demo( P, desconhecido ), nao( demo( X, verdadeiro) ).
-demo( P => X, falso ) :- demo( P, verdadeiro ), demo( X, falso ).
-
-demo( P $$ X, verdadeiro ) :- demo( P, verdadeiro ).
-demo( P $$ X, verdadeiro ) :- demo( X, verdadeiro ).
-demo( P $$ X, desconhecido ) :- nao( demo( P, verdadeiro ) ), demo( X, desconhecido ).
-demo( P $$ X, desconhecido ) :- demo( P, desconhecido ), demo( X, falso ).
-demo( P $$ X, falso ) :- demo( P, falso ), demo( X, falso ).
-
-demo( P && X, verdadeiro ) :- demo( P, verdadeiro ), demo( X, verdadeiro ).
-demo( P && X, falso ) :- demo( P, falso ).
-demo( P && X, falso ) :- demo( X, falso ).
-demo( P && X, desconhecido ) :- demo( P, desconhecido ), nao( demo( X, falso ) ).
-demo( P && X, desconhecido ) :- demo( P, verdadeiro ), demo( X, desconhecido ).
-
-demo(t, verdadeiro).
-demo(f,falso).
-
-demo( P , verdadeiro ) :- P.
-demo( P, falso ) :- -P.
-demo( P, desconhecido ) :- nao( P ), nao( -P ).
-
-%demo novo
-demoN( P <=> X, V ) :- demoN( P, V1 ), demoN( X, V2 ), equivalencia( V1, V2, V ), !.
-demoN( P => X, V ) :- demoN( P, V1 ), demoN( X, V2 ), implicacao( V1, V2, V ), !.
-demoN( P $$ X, V ) :- demoN( P, V1 ), demoN( X, V2 ), disjuncao( V1, V2, V ), !.
-demoN( P && X, V ) :- demoN( P, V1 ), demoN( X, V2 ), conjuncao( V1, V2, V ), !.
+demo( P <=> X, V ) :- demo( P, V1 ), demo( X, V2 ), equivalencia( V1, V2, V ), !.
+demo( P => X, V ) :- demo( P, V1 ), demo( X, V2 ), implicacao( V1, V2, V ), !.
+demo( P $$ X, V ) :- demo( P, V1 ), demo( X, V2 ), disjuncao( V1, V2, V ), !.
+demo( P && X, V ) :- demo( P, V1 ), demo( X, V2 ), conjuncao( V1, V2, V ), !.
 
 equivalencia( X, X, verdadeiro ) :- X \= desconhecido.
 equivalencia( desconhecido, Y, desconhecido ).
@@ -734,11 +702,9 @@ conjuncao( _, falso, falso ).
 conjuncao( desconhecido, verdadeiro, desconhecido ).
 conjuncao( verdadeiro, desconhecido, desconhecido ).
 
-v(A).
--f(B).
-demoN( P , verdadeiro ) :- P.
-demoN( P, falso ) :- -P.
-demoN( P, desconhecido ) :- nao( P ), nao( -P ).
+demo( P , verdadeiro ) :- P.
+demo( P, falso ) :- -P.
+demo( P, desconhecido ) :- nao( P ), nao( -P ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado doenca :: IdDoenca, Designacao, Descricao -> {V,F,D}
