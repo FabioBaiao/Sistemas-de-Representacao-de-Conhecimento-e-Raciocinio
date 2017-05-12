@@ -7,6 +7,7 @@ library(leaps)
 #
 ###
 
+# change this to your path
 dataset <- read.csv("~/Desktop/6th_semester/srcr/project/projecto_rna/exaustao.csv")
 
 # after using weka or running plot(density(dataset$<column>)) to see the distribution of each
