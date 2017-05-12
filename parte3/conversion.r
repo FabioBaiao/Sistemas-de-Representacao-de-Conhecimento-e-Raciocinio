@@ -9,7 +9,9 @@ library(leaps)
 
 # change this to your path
 dataset <- read.csv("~/Desktop/6th_semester/srcr/project/projecto_rna/exaustao.csv")
-
+for( i in 1:844) {
+  dataset$FatigueLevel[i] = dataset$FatigueLevel[i] * (1/7)
+}
 # after using weka or running plot(density(dataset$<column>)) to see the distribution of each
 # variable, we discretize each one accordingly
 x1 <- as.numeric(discretize(dataset$Performance.KDTMean,method="frequency",categories=1,labels=1:1))
@@ -40,3 +42,5 @@ dataset$Performance.Task <- as.numeric(dataset$Performance.Task)
 # formula to use when using regsubsets
 form <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.MVMean + Performance.DDCMean + Performance.AEDMean + Performance.DMSMean + Performance.ADMSLMean + Performance.TBCMean
 
+## write converted file. add your path
+write.csv(dataset, file ="~/Desktop/6th_semester/srcr/project/projecto_rna/discrExaustao.csv", row.names=FALSE)
