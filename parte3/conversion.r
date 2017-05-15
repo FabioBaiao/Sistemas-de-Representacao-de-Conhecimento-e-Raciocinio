@@ -8,7 +8,7 @@ library(leaps)
 ###
 
 # change this to your path
-dataset <- read.csv("~/Desktop/6th_semester/srcr/project/projecto_rna/exaustao.csv")
+dataset <- read.csv("C:\\Users\\joaop\\Documents\\GitHub\\srcr_assignment\\parte3\\exaustao.csv")
 for( i in 1:844) {
   dataset$FatigueLevel[i] = dataset$FatigueLevel[i] * (1/7)
 }
@@ -43,4 +43,4 @@ dataset$Performance.Task <- as.numeric(dataset$Performance.Task)
 form <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.MVMean + Performance.DDCMean + Performance.AEDMean + Performance.DMSMean + Performance.ADMSLMean + Performance.TBCMean
 
 ## write converted file. add your path
-write.csv(dataset, file ="~/Desktop/6th_semester/srcr/project/projecto_rna/discrExaustao.csv", row.names=FALSE)
+write.csv(dataset, file ="C:\\Users\\joaop\\Documents\\GitHub\\srcr_assignment\\parte3\\discrExaustao.csv", row.names=FALSE)
