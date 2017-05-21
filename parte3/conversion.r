@@ -1,5 +1,6 @@
 library(arules)
 library(leaps)
+
 ###
 #
 # SHOULD WE RUN regsubsets (for selecting the most meaningful variables) BEFORE OR AFTER RUNNING 
@@ -8,39 +9,52 @@ library(leaps)
 ###
 
 # change this to your path
-dataset <- read.csv("C:\\Users\\joaop\\Documents\\GitHub\\srcr_assignment\\parte3\\exaustao.csv")
-for( i in 1:844) {
-  dataset$FatigueLevel[i] = dataset$FatigueLevel[i] * (1/7)
-}
+dataset <- read.csv("~/Desktop/6th_semester/srcr/project/fst_project/parte3/exaustao.csv")
+
 # after using weka or running plot(density(dataset$<column>)) to see the distribution of each
 # variable, we discretize each one accordingly
-x1 <- as.numeric(discretize(dataset$Performance.KDTMean,method="frequency",categories=1,labels=1:1))
-x2 <- as.numeric(discretize(dataset$Performance.MAMean,method="frequency",categories=2,labels=1:2))
-x3 <- as.numeric(discretize(dataset$Performance.MVMean,method="frequency",categories=1,labels=1:1))
-x4 <- as.numeric(discretize(dataset$Performance.TBCMean,method="frequency",categories=2,labels=1:2))
+x1 <- as.numeric(discretize(dataset$Performance.KDTMean,method="frequency",categories=2,labels=1:2))
+x2 <- as.numeric(discretize(dataset$Performance.MAMean,method="frequency",categories=4,labels=1:4))
+x3 <- as.numeric(discretize(dataset$Performance.MVMean,method="frequency",categories=3,labels=1:3))
+x4 <- as.numeric(discretize(dataset$Performance.TBCMean,method="frequency",categories=3,labels=1:3))
 x5 <- as.numeric(discretize(dataset$Performance.DDCMean,method="frequency",categories=3,labels=1:3))
-x6 <- as.numeric(discretize(dataset$Performance.DMSMean,method="frequency",categories=2,labels=1:2))
+x6 <- as.numeric(discretize(dataset$Performance.DMSMean,method="frequency",categories=3,labels=1:3))
 x7 <- as.numeric(discretize(dataset$Performance.AEDMean,method="frequency",categories=3,labels=1:3))
-x8 <- as.numeric(discretize(dataset$Performance.ADMSLMean,method="frequency",categories=4,labels=1:4))
+x8 <- as.numeric(discretize(dataset$Performance.ADMSLMean,method="frequency",categories=5,labels=1:5))
+
+dataset$Performance.KDTMean <- x1 * (1/2)
+dataset$Performance.MAMean <- x2 * (1/4)
+dataset$Performance.MVMean <- x3 * (1/3)
+dataset$Performance.TBCMean <- x4 * (1/3)
+dataset$Performance.DDCMean <- x5 * (1/3)
+dataset$Performance.DMSMean <- x6 * (1/3)
+dataset$Performance.AEDMean <- x7 * (1/3)
+dataset$Performance.ADMSLMean <- x8 * (1/5)
+
+set.seed(11) # set a seed so that sample always gives the same train set
+sample <- sample.int(n=nrow(dataset), size=floor(.75*nrow(dataset)),replace=F)
+train <- dataset[sample, ]
+test  <- dataset[-sample, ]
+
+train$FatigueLevel = train$FatigueLevel * (1/7)
 
 # uncomment the next lines and change category and labels to use other exhaustion scales
 #f <- as.numeric(discretize(dataset$FatigueLevel,method="frequency",categories=5,labels=1:5))
-#dataset$FatigueLevel <- f
-
-dataset$Performance.KDTMean <- x1
-dataset$Performance.MAMean <- x2
-dataset$Performance.MVMean <- x3
-dataset$Performance.TBCMean <- x4
-dataset$Performance.DDCMean <- x5
-dataset$Performance.DMSMean <- x6
-dataset$Performance.AEDMean <- x7
-dataset$Performance.ADMSLMean <- x8
+#dataset$FatigueLevel <- f * (1/5)
 
 # this just maps work, office and programming to 1,2 and 3 (not sure about the order here)
-dataset$Performance.Task <- as.numeric(dataset$Performance.Task)
+#train$Performance.Task <- as.numeric(train$Performance.Task) * (1/3)
+train$Performance.Task <- as.numeric(train$Performance.Task)
+train$Performance.Task[train$Performance.Task == 1] <- 0
+train$Performance.Task[train$Performance.Task == 2] <- 0.5
+train$Performance.Task[train$Performance.Task == 3] <- 1
+test$Performance.Task <- as.numeric(test$Performance.Task)
 
 # formula to use when using regsubsets
-form <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.MVMean + Performance.DDCMean + Performance.AEDMean + Performance.DMSMean + Performance.ADMSLMean + Performance.TBCMean
-
+formFL <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.MVMean + Performance.DDCMean + Performance.AEDMean + Performance.DMSMean + Performance.ADMSLMean + Performance.TBCMean
+formT <- Performance.Task ~ Performance.KDTMean + Performance.MAMean + Performance.MVMean + Performance.DDCMean + Performance.AEDMean + Performance.DMSMean + Performance.ADMSLMean + Performance.TBCMean
 ## write converted file. add your path
-write.csv(dataset, file ="C:\\Users\\joaop\\Documents\\GitHub\\srcr_assignment\\parte3\\discrExaustao.csv", row.names=FALSE)
+write.csv(dataset, file ="~/Desktop/6th_semester/srcr/project/projecto_rna/discrExaustao.csv", row.names=FALSE)
+
+resultsFL <- regsubsets(formFL, dataset, nvmax=8)
+resultsT <- regsubsets(formT, dataset, nvmax=8)
