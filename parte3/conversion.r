@@ -31,14 +31,14 @@ dataset$Performance.DMSMean <- x6 * (1/3)
 dataset$Performance.AEDMean <- x7 * (1/3)
 dataset$Performance.ADMSLMean <- x8 * (1/5)
 
+#dataset$FatigueLevel <- as.numeric(discretize(dataset$FatigueLevel,method="frequency",categories=3,labels=1:3))
+dataset$FatigueLevel[which(dataset$FatigueLevel > 3)] <- 4
 set.seed(11) # set a seed so that sample always gives the same train set
 sample <- sample.int(n=nrow(dataset), size=floor(.75*nrow(dataset)),replace=F)
 train <- dataset[sample, ]
 test  <- dataset[-sample, ]
 
-
 # uncomment the next lines and change category and labels to use other exhaustion scales
-f <- as.numeric(discretize(dataset$FatigueLevel,method="frequency",categories=4,labels=1:4))
 train$FatigueLevel = (train$FatigueLevel - 1) / 3
 
 # this just maps work, office and programming to 1,2 and 3 (not sure about the order here)
