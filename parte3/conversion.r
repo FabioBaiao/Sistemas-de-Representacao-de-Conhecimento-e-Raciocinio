@@ -36,19 +36,19 @@ sample <- sample.int(n=nrow(dataset), size=floor(.75*nrow(dataset)),replace=F)
 train <- dataset[sample, ]
 test  <- dataset[-sample, ]
 
-train$FatigueLevel = train$FatigueLevel * (1/7)
 
 # uncomment the next lines and change category and labels to use other exhaustion scales
-#f <- as.numeric(discretize(dataset$FatigueLevel,method="frequency",categories=5,labels=1:5))
-#dataset$FatigueLevel <- f * (1/5)
+f <- as.numeric(discretize(dataset$FatigueLevel,method="frequency",categories=4,labels=1:4))
+train$FatigueLevel = (train$FatigueLevel - 1) / 3
 
 # this just maps work, office and programming to 1,2 and 3 (not sure about the order here)
+
 #train$Performance.Task <- as.numeric(train$Performance.Task) * (1/3)
-train$Performance.Task <- as.numeric(train$Performance.Task)
-train$Performance.Task[train$Performance.Task == 1] <- 0
-train$Performance.Task[train$Performance.Task == 2] <- 0.5
-train$Performance.Task[train$Performance.Task == 3] <- 1
-test$Performance.Task <- as.numeric(test$Performance.Task)
+#train$Performance.Task <- as.numeric(train$Performance.Task)
+#train$Performance.Task[train$Performance.Task == 1] <- 0
+#train$Performance.Task[train$Performance.Task == 2] <- 0.5
+#train$Performance.Task[train$Performance.Task == 3] <- 1
+#test$Performance.Task <- as.numeric(test$Performance.Task)
 
 # formula to use when using regsubsets
 formFL <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.MVMean + Performance.DDCMean + Performance.AEDMean + Performance.DMSMean + Performance.ADMSLMean + Performance.TBCMean

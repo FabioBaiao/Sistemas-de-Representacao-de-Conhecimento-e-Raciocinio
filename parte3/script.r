@@ -12,14 +12,14 @@ library(arules)
 #sigmoid <- function(x) {1/(1+exp(-x))}
 # formula variables should be changed after calling regsubsets(form, dataset, nvmax=8) after running conversion.r
 #formula <- FatigueLevel ~ Performance.MAMean + Performance.AEDMean + Performance.DDCMean + Performance.DMSMean
-#formulaFL <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.AEDMean + Performance.DDCMean + Performance.DMSMean
-formulaT <- Performance.Task ~ Performance.KDTMean + Performance.DDCMean + Performance.MAMean + Performance.DMSMean + Performance.MVMean
-task1 <- neuralnet(formulaT, train, hidden=c(7,3), lifesign = "FULL",algorithm="rprop+",linear.output = FALSE,threshold = 0.03)
+formulaFL <- FatigueLevel ~ Performance.KDTMean + Performance.MAMean + Performance.DDCMean + Performance.DMSMean + Performance.AEDMean 
+#formulaT <- Performance.Task ~ Performance.KDTMean + Performance.DDCMean + Performance.MAMean + Performance.DMSMean + Performance.MVMean
+fatigue1 <- neuralnet(formulaFL, train, hidden=c(7,4,3), lifesign = "FULL",algorithm="rprop+",linear.output = FALSE,threshold = 0.02)
 
 # get a subset of test set (only de columns of the variables used in formula)
-test.01 <- subset(test, select=c("Performance.KDTMean", "Performance.DDCMean","Performance.MAMean", "Performance.DMSMean", "Performance.MVMean"))
-task1.resultados <- compute(task1, test.01)
-resultados <- data.frame(atual=test$Performance.Task, previsao=(task1.resultados$net.result*2)+1)
+test.01 <- subset(test, select=c("Performance.KDTMean","Performance.MAMean", "Performance.DDCMean", "Performance.DMSMean", "Performance.MVMean"))
+fatigue1.resultados <- compute(fatigue1, test.01)
+resultados <- data.frame(atual=test$FatigueLevel, previsao=(fatigue1.resultados$net.result*2)+1)
 resultados$previsao <- round(resultados$previsao, digits=0)
 resultados$atual <- round(resultados$atual, digits=0)
-rmse(c(test$Performance.Task), c(resultados$previsao))
+rmse(c(test$FatigueLevel), c(resultados$previsao))
